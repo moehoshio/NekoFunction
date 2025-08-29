@@ -3,6 +3,8 @@
 A modern C++ utility library that provides wrapped implementations of practical functions.  
 Includes utilities such as operators, string processing, hash calculation, time handling, Base64 encoding, random number generation, and UUID tools.
 
+[![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](./LICENSE)
+
 ## Features
 
 - Easy to use
@@ -58,7 +60,6 @@ git clone https://github.com/moehoshio/utilities.hpp.git && cd utilities.hpp
 - [Hash](#hash-calculation-requires-openssl)
 - [UUID](#uuid)
 - [Complete Example](#complete-example)
-- [License](#license)
 
 ### Hash Support (Optional)
 
@@ -365,7 +366,3 @@ int main() {
     return 0;
 }
 ```
-
-## LICENSE
-
-MIT OR Apache-2.0
