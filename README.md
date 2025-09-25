@@ -1,9 +1,9 @@
-# Utilities.hpp
+# NekoUtility
 
 A modern C++ utility library that provides wrapped implementations of practical functions.  
 Includes utilities such as operators, string processing, hash calculation, time handling, Base64 encoding, random number generation, and UUID tools.
 
-[![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
 
 ## Features
 
@@ -27,15 +27,19 @@ Includes utilities such as operators, string processing, hash calculation, time 
 1. Clone the repository locally
 
 ```bash
-git clone https://github.com/moehoshio/utilities.hpp.git && cd utilities.hpp
+git clone https://github.com/moehoshio/NekoUtility.git
 ```
 
 2. Copy the entire include directory to your include path
 
+```shell
+cp -r NekoUtility/include/ /path/to/your/include/
+```
+
 3. Include the header file in your code
 
 ```cpp
-#include "neko/function/utilities.hpp"
+#include <neko/function/utilities.hpp>
 ```
 
 4. Use the utilities
@@ -324,7 +328,7 @@ auto uuid3_custom = uuidV3("example.com", "custom-namespace-uuid");
 
 ```cpp
 #include <openssl/sha.h>
-#include "neko/function/utilities.hpp"
+#include <neko/function/utilities.hpp>
 #include <iostream>
 
 using namespace neko::ops::pipe;
