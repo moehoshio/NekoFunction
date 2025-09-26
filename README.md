@@ -74,7 +74,7 @@ Please ensure OpenSSL headers are in your include path and link the library.
 
 ## Quick Start
 
-Configure: [CMake](#cmake) | [Manual](#manual)
+Configure: [CMake](#cmake) | [Manual](#manual) | [Test](#test)
 
 Usage:
 - [Core Utilities](#core-utilities)
@@ -690,4 +690,48 @@ int main() {
     
     return 0;
 }
+```
+
+## Test
+
+You can run the tests to verify that everything is working correctly.
+
+If you haven't configured the build yet, please run:
+
+```shell
+cmake -B ./build .
+```
+
+Now, you can build the test files (you must build them manually at least once before running the tests!).
+
+```shell
+cmake --build ./build -DNEKO_BUILD_TESTS=ON
+```
+
+Then, you can run the tests with the following commands:
+
+Unix Makefile / Ninja generator：
+
+```shell
+cmake --build ./build --target test
+```
+
+Visual Studio generator：
+
+```shell
+cmake --build ./build --config Debug --target RUN_TESTS
+```
+
+If everything is set up correctly, you should see output similar to the following:
+
+```shell
+
+
+  Test project /path/to/NekoFunction/build
+      Start 1: NekoFunction_tests
+  1/1 Test #1: NekoFunction_tests ...............   Passed    0.21 sec
+
+  100% tests passed, 0 tests failed out of 1
+
+  Total Test time (real) =   0.21 sec
 ```
