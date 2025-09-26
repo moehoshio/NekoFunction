@@ -208,7 +208,7 @@ namespace neko::util::detect {
         if (!file.is_open()) {
             if (noex)
                 return "Unknown";
-            throw ex::FileError("Cannot open file: " + filename, ex::ExceptionExtensionInfo{});
+            throw ex::FileError("Cannot open file: " + filename);
         }
 
         neko::uchar buffer[32] = {0};
@@ -236,7 +236,7 @@ namespace neko::util::detect {
             oss << std::setw(2) << std::setfill('0') << static_cast<neko::uint32>(buffer[i]) << ' ';
         }
 
-        throw ex::FileError(oss.str(), ex::ExceptionExtensionInfo{});
+        throw ex::FileError(oss.str());
     }
 
     /**
