@@ -8,6 +8,8 @@
 
 #pragma once
 
+#ifdef NEKO_ENABLE_ARCHIVER
+
 #include <neko/function/detectFileType.hpp>
 #include <neko/schema/exception.hpp>
 
@@ -150,3 +152,5 @@ namespace neko::archive {
     } // namespace zip
 
 } // namespace neko::archive
+
+#endif // NEKO_ENABLE_ARCHIVER

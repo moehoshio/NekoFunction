@@ -62,6 +62,11 @@ NekoFunction integrates multiple functional modules including utilities, archive
 - C++20 or higher compatible compiler
 - CMake 3.14 or higher (if using CMake)
 
+### Archive Management (Optional)
+
+Archive management features will be automatically enabled if minizip-ng is installed.  
+Please ensure minizip-ng headers are in your include path and link the library.
+
 ### Hash Support (Optional)
 
 Hash support will be automatically enabled if OpenSSL is installed.  
