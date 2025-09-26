@@ -4,7 +4,7 @@
  * @author moehoshio
  * @copyright Copyright (c) 2025 Hoshi
  * @license MIT OR Apache-2.0
- * @link https://github.com/moehoshio/NekoUtility
+ * @link https://github.com/moehoshio/NekoFunction
  *
  * This header provides a collection of utilities:
  * - Functional programming operators
