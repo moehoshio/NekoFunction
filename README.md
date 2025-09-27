@@ -145,6 +145,10 @@ target_link_libraries(your_target PRIVATE NekoFunction)
 
 ### Manual
 
+When installing manually, you need to manually fetch the dependency [`NekoSchema`](https://github.com/moehoshio/NekoSchema).
+
+After installing the dependency, please continue:
+
 1. Clone the repository locally
 
 ```bash
