@@ -73,7 +73,7 @@ jobs:
       if: startsWith(matrix.config.os, 'ubuntu')
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build
+        sudo apt-get install -y build-essential cmake ninja-build libssl-dev
         if [ "${{ matrix.config.cxx }}" = "clang++" ]; then
           sudo apt-get install -y clang
         fi
@@ -92,11 +92,13 @@ jobs:
     - name: Install dependencies (macOS)
       if: startsWith(matrix.config.os, 'macos')
       run: |
-        brew install cmake ninja
+        brew install cmake ninja openssl
 
     - name: Install dependencies (Windows)
       if: startsWith(matrix.config.os, 'windows')
       run: |
+        # Install OpenSSL
+        choco install openssl
         if ("${{ matrix.config.generators }}" -eq "Ninja") {
           choco install ninja
           # Setup Clang

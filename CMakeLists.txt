@@ -37,6 +37,7 @@ target_include_directories(NekoFunction INTERFACE
 
 if(OpenSSL_FOUND)
     target_compile_definitions(NekoFunction INTERFACE NEKO_ENABLE_HASH_SUPPORT)
+    target_link_libraries(NekoFunction INTERFACE OpenSSL::SSL OpenSSL::Crypto)
 endif()
 
 if(MINIZIP_FOUND AND NEKO_ENABLE_ARCHIVER)
@@ -59,6 +60,10 @@ if(NEKO_BUILD_TESTS)
     target_include_directories(NekoFunction_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
     target_link_libraries(NekoFunction_test PRIVATE NekoFunction)
     target_compile_features(NekoFunction_test PRIVATE cxx_std_20)
+    
+    if(OpenSSL_FOUND)
+        target_link_libraries(NekoFunction_test PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+    endif()
     
     if(MSVC)
         target_compile_options(NekoFunction_test PRIVATE /Zc:__cplusplus)
