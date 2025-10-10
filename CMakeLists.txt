@@ -82,14 +82,6 @@ if(NEKO_BUILD_TESTS)
         target_link_libraries(NekoFunction_test PRIVATE MINIZIP::minizip-ng)
     endif()
     
-    if(MSVC)
-        target_compile_options(NekoFunction_test PRIVATE /Zc:__cplusplus)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(NekoFunction_test PRIVATE -std=c++20)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(NekoFunction_test PRIVATE -std=c++20)
-    endif()
-
     # Add the test first
     add_test(NAME NekoFunction_tests COMMAND NekoFunction_test)
 

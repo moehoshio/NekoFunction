@@ -5,6 +5,7 @@ NekoFunction integrates multiple functional modules including utilities, archive
 
 [![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
 ![Require](https://img.shields.io/badge/%20Require%20-%3E=%20C++%2020-orange.svg)
+[![CMake](https://img.shields.io/badge/CMake-3.14+-green.svg)](https://cmake.org/)
 
 ## Features
 
@@ -149,10 +150,18 @@ When installing manually, you need to manually fetch the dependency [`NekoSchema
 
 After installing the dependency, please continue:
 
-1. Clone the repository locally
+1. Clone or download the repository to your host
 
 ```bash
 git clone https://github.com/moehoshio/NekoFunction.git
+```
+
+or
+
+```shell
+curl -L -o NekoFunction.zip https://github.com/moehoshio/NekoFunction/archive/refs/heads/main.zip
+
+unzip NekoFunction.zip
 ```
 
 2. Copy the entire include directory to your include path
@@ -714,16 +723,8 @@ cmake --build ./build -DNEKO_BUILD_TESTS=ON
 
 Then, you can run the tests with the following commands:
 
-Unix Makefile / Ninja generator：
-
 ```shell
-cmake --build ./build --target test
-```
-
-Visual Studio generator：
-
-```shell
-cmake --build ./build --config Debug --target RUN_TESTS
+cd ./build && ctest --output-on-failure
 ```
 
 If everything is set up correctly, you should see output similar to the following:
@@ -739,3 +740,16 @@ If everything is set up correctly, you should see output similar to the followin
 
   Total Test time (real) =   0.21 sec
 ```
+
+## License
+
+[License](LICENSE) MIT OR Apache-2.0
+
+## See More
+
+- [NekoLog](https://github.com/moehoshio/NekoLog): An easy-to-use, modern, lightweight, and efficient C++20 logging library.
+- [NekoEvent](https://github.com/moehoshio/NekoEvent): A modern easy to use type-safe and high-performance event handling system for C++.
+- [NekoSchema](https://github.com/moehoshio/NekoSchema): A lightweight, header-only C++20 schema library.
+- [NekoSystem](https://github.com/moehoshio/NekoSystem): A modern C++20 cross-platform system utility library.
+- [NekoFunction](https://github.com/moehoshio/NekoFunction): A comprehensive modern C++ utility library that provides practical functions for common programming tasks.
+- [NekoThreadPool](https://github.com/moehoshio/NekoThreadPool): An easy to use and efficient C++ 20 thread pool that supports priorities and submission to specific threads.
