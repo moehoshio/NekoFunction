@@ -8,7 +8,7 @@
 
 #pragma once
 
-#ifdef NEKO_ENABLE_ARCHIVER
+#ifdef NEKO_FUNCTION_ENABLE_ARCHIVER
 
 #include <neko/function/detectFileType.hpp>
 #include <neko/schema/exception.hpp>
@@ -153,4 +153,4 @@ namespace neko::archive {
 
 } // namespace neko::archive
 
-#endif // NEKO_ENABLE_ARCHIVER
+#endif // NEKO_FUNCTION_ENABLE_ARCHIVER

@@ -19,19 +19,18 @@ message(STATUS "Start configuration Neko Function")
 message(STATUS "NekoFunction configuration summary:")
 message(STATUS "  - CMake version: ${CMAKE_VERSION}")
 message(STATUS "")
-message(STATUS "  - Neko Auto fetch deps: ${NEKO_AUTO_FETCH_DEPS}")
-message(STATUS "  - Neko Build tests: ${NEKO_BUILD_TESTS}")
-message(STATUS "  - Neko Archiver enabled: ${NEKO_ENABLE_ARCHIVER}")
+message(STATUS "  - Neko Function Auto fetch deps: ${NEKO_FUNCTION_AUTO_FETCH_DEPS} common: ${NEKO_AUTO_FETCH_DEPS}")
+message(STATUS "  - Neko Function Build tests: ${NEKO_FUNCTION_BUILD_TESTS} common: ${NEKO_BUILD_TESTS}")
+message(STATUS "  - Neko Function Archiver enabled: ${NEKO_FUNCTION_ENABLE_ARCHIVER}")
 message(STATUS "")
 message(STATUS "Dependency summary:")
-message(STATUS "  - GoogleTest support: ${GTest_FOUND}")
-message(STATUS "  - OpenSSL support: ${OpenSSL_FOUND}")
-message(STATUS "  - Archiver and minizip-ng support: ${minizip-ng_FOUND}")
-message(STATUS "  - Hash support enabled: ${OpenSSL_FOUND}")
+message(STATUS "  - OpenSSL support: ${OpenSSL_FOUND} version: ${OpenSSL_VERSION}")
+message(STATUS "  - Archiver and minizip-ng support: ${minizip-ng_FOUND} version: ${minizip-ng_VERSION}")
+message(STATUS "  - Hash support enabled: ${OpenSSL_FOUND} via OpenSSL")
 message(STATUS "")
 
 
-if(NEKO_AUTO_FETCH_DEPS OR NEKO_FUNCTION_AUTO_FETCH_DEPS)
+if(NEKO_FUNCTION_AUTO_FETCH_DEPS OR (NEKO_AUTO_FETCH_DEPS AND NEKO_FUNCTION_AUTO_FETCH_DEPS))
     include(FetchContent)
     
     FetchContent_Declare(
@@ -52,7 +51,6 @@ if(NEKO_AUTO_FETCH_DEPS OR NEKO_FUNCTION_AUTO_FETCH_DEPS)
         set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
         FetchContent_MakeAvailable(googletest)
     endif()
-
 endif()
 
 # Main library target
@@ -72,7 +70,7 @@ target_link_libraries(NekoFunction INTERFACE NekoSchema)
 target_compile_features(NekoFunction INTERFACE cxx_std_20)
 
 if(OpenSSL_FOUND)
-    target_compile_definitions(NekoFunction INTERFACE NEKO_ENABLE_HASH_SUPPORT)
+    target_compile_definitions(NekoFunction INTERFACE NEKO_FUNCTION_ENABLE_HASH_SUPPORT NEKO_IMPORT_OPENSSL)
     target_link_libraries(NekoFunction INTERFACE OpenSSL::SSL OpenSSL::Crypto)
     if(WIN32)
         if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
@@ -109,12 +107,12 @@ endif()
 
 
 # Tests
-if(NEKO_BUILD_TESTS OR NEKO_FUNCTION_BUILD_TESTS)
+if(NEKO_FUNCTION_BUILD_TESTS OR (NEKO_BUILD_TESTS AND NEKO_FUNCTION_BUILD_TESTS))
     enable_testing()
     message(STATUS "NekoFunction tests enabled")
 
     if (NOT NEKO_AUTO_FETCH_DEPS AND NOT NEKO_FUNCTION_AUTO_FETCH_DEPS)
-        message(FATAL_ERROR "GTest is required for building tests. Please enable NEKO_AUTO_FETCH_DEPS")
+        message(FATAL_ERROR "GTest is required for building tests. Please enable NEKO_AUTO_FETCH_DEPS or NEKO_FUNCTION_AUTO_FETCH_DEPS")
     endif()
 
     add_executable(NekoFunction_test tests/NekoFunction_test.cpp)

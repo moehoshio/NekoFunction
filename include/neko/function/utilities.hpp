@@ -38,13 +38,8 @@
 #include <unordered_map>
 #include <vector>
 
-// If OpenSSL is available, import its headers for hash functions
-#if __has_include("openssl/md5.h") && __has_include("openssl/sha.h")
-#define NEKO_IMPORT_OPENSSL
-#define NEKO_ENABLE_HASH_SUPPORT
-#endif
 
-#if defined(NEKO_ENABLE_HASH_SUPPORT)
+#if defined(NEKO_FUNCTION_ENABLE_HASH_SUPPORT)
 
 // Include OpenSSL headers for hash functions
 #if defined(NEKO_IMPORT_OPENSSL)
@@ -52,10 +47,10 @@
 #include <openssl/sha.h>
 
 #else
-#undef NEKO_ENABLE_HASH_SUPPORT // If no supported hash functions are available, undefine the macro
+#undef NEKO_FUNCTION_ENABLE_HASH_SUPPORT // If no supported hash functions are available, undefine the macro
 #endif
 
-#endif // NEKO_ENABLE_HASH_SUPPORT
+#endif // NEKO_FUNCTION_ENABLE_HASH_SUPPORT
 
 /**
  * @namespace neko::ops
@@ -803,7 +798,7 @@ namespace neko::util {
         }
     } // namespace check
 
-#if defined(NEKO_ENABLE_HASH_SUPPORT)
+#if defined(NEKO_FUNCTION_ENABLE_HASH_SUPPORT)
 
     /**
      * @namespace neko::util::hash
@@ -913,7 +908,7 @@ namespace neko::util {
 
     } // namespace hash
 
-#endif // NEKO_ENABLE_HASH_SUPPORT
+#endif // NEKO_FUNCTION_ENABLE_HASH_SUPPORT
 
     /**
      * @namespace neko::util::uuid
