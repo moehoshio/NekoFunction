@@ -12,18 +12,8 @@ option(NEKO_FUNCTION_AUTO_FETCH_DEPS "Neko Function Automatically fetch dependen
 option(NEKO_FUNCTION_ENABLE_ARCHIVER "Neko Function Enable archiver support (requires minizip-ng)" ON)
 option(NEKO_FUNCTION_ENABLE_HASH "Neko Function Enable hash support (requires OpenSSL)" ON)
 
-
-if (DEFINED NEKO_FUNCTION_LIBRARY_PATH)
-    find_package(OpenSSL
-        HINTS "${NEKO_FUNCTION_LIBRARY_PATH}"
-    )
-    find_package(minizip-ng CONFIG
-        HINTS "${NEKO_FUNCTION_LIBRARY_PATH}"
-    )
-else()
-    find_package(minizip-ng CONFIG QUIET)
-    find_package(OpenSSL QUIET)
-endif()
+find_package(minizip-ng CONFIG QUIET)
+find_package(OpenSSL QUIET)
 
 
 # Print configuration summary
