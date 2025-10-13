@@ -8,57 +8,35 @@ option(NEKO_ENABLE_ARCHIVER "Enable archiver support (requires minizip-ng)" ON)
 find_package(minizip-ng CONFIG QUIET)
 find_package(OpenSSL QUIET)
 
-set(NEKOFUNCTION_SOURCES)
+# Print configuration summary
+message(STATUS "NekoFunction configuration summary:")
+message(STATUS "  - CMake version: ${CMAKE_VERSION}")
+message(STATUS "")
+message(STATUS "  - Neko Auto fetch deps: ${NEKO_AUTO_FETCH_DEPS}")
+message(STATUS "  - Neko Build tests: ${NEKO_BUILD_TESTS}")
+message(STATUS "  - Neko Archiver enabled: ${NEKO_ENABLE_ARCHIVER}")
+message(STATUS "")
+message(STATUS "Dependency summary:")
+message(STATUS "  - GoogleTest support: ${GTest_FOUND}")
+message(STATUS "  - OpenSSL support: ${OpenSSL_FOUND}")
+message(STATUS "  - Archiver and minizip-ng support: ${minizip-ng_FOUND}")
+message(STATUS "  - Hash support enabled: ${OpenSSL_FOUND}")
+message(STATUS "")
+
 
 if(NEKO_AUTO_FETCH_DEPS)
     include(FetchContent)
+    
     FetchContent_Declare(
         NekoSchema
         GIT_REPOSITORY https://github.com/moehoshio/NekoSchema.git
         GIT_TAG        main
     )
     FetchContent_MakeAvailable(NekoSchema)
-endif()
 
-# Main library target
-if(MINIZIP_FOUND AND NEKO_ENABLE_ARCHIVER)
-    add_library(NekoFunction STATIC src/neko/function/archiverZip.cpp)
-else()
-    add_library(NekoFunction INTERFACE)
-endif()
-add_library(Neko::Function ALIAS NekoFunction)
+    if(NEKO_BUILD_TESTS)
+        message(STATUS "GTest not found. Fetching GoogleTest...")
 
-
-
-target_include_directories(NekoFunction INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-if(OpenSSL_FOUND)
-    target_compile_definitions(NekoFunction INTERFACE NEKO_ENABLE_HASH_SUPPORT)
-    target_link_libraries(NekoFunction INTERFACE OpenSSL::SSL OpenSSL::Crypto)
-endif()
-
-if(MINIZIP_FOUND AND NEKO_ENABLE_ARCHIVER)
-    target_compile_definitions(NekoFunction INTERFACE NEKO_ENABLE_ARCHIVER)
-    target_link_libraries(NekoFunction INTERFACE MINIZIP::minizip-ng)
-endif()
-
-target_link_libraries(NekoFunction INTERFACE NekoSchema)
-target_compile_features(NekoFunction INTERFACE cxx_std_20)
-
-if(MSVC)
-    target_compile_options(NekoFunction INTERFACE /Zc:__cplusplus)
-endif()
-
-if(NEKO_BUILD_TESTS)
-    enable_testing()
-
-    find_package(GTest QUIET)
-
-    if(NOT GTest_FOUND)
-        include(FetchContent)
         FetchContent_Declare(
             googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
@@ -68,35 +46,79 @@ if(NEKO_BUILD_TESTS)
         FetchContent_MakeAvailable(googletest)
     endif()
 
-    # Create test executable
+endif()
+
+# Main library target
+if(minizip-ng_FOUND AND NEKO_ENABLE_ARCHIVER)
+    add_library(NekoFunction STATIC src/neko/function/archiverZip.cpp)
+else()
+    add_library(NekoFunction INTERFACE)
+endif()
+add_library(Neko::Function ALIAS NekoFunction)
+
+target_include_directories(NekoFunction INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(NekoFunction INTERFACE NekoSchema)
+target_compile_features(NekoFunction INTERFACE cxx_std_20)
+
+if(OpenSSL_FOUND)
+    target_compile_definitions(NekoFunction INTERFACE NEKO_ENABLE_HASH_SUPPORT)
+    target_link_libraries(NekoFunction INTERFACE OpenSSL::SSL OpenSSL::Crypto)
+    if(WIN32)
+        if(minizip-ng_FOUND AND NEKO_ENABLE_ARCHIVER)
+            # STATIC library - use PUBLIC
+            target_link_libraries(NekoFunction PUBLIC
+                Crypt32
+                ws2_32
+                advapi32
+                user32
+                bcrypt
+            )
+        else()
+            # INTERFACE library - use INTERFACE
+            target_link_libraries(NekoFunction INTERFACE
+                Crypt32
+                ws2_32
+                advapi32
+                user32
+                bcrypt
+            )
+        endif()
+        message(STATUS "Linking Windows system libraries for OpenSSL static build")
+    endif()
+endif()
+
+if(minizip-ng_FOUND AND NEKO_ENABLE_ARCHIVER)
+    target_compile_definitions(NekoFunction INTERFACE NEKO_ENABLE_ARCHIVER)
+    target_link_libraries(NekoFunction INTERFACE MINIZIP::minizip-ng)
+endif()
+
+if(MSVC)
+    target_compile_options(NekoFunction INTERFACE /Zc:__cplusplus)
+endif()
+
+
+# Tests
+if(NEKO_BUILD_TESTS)
+    enable_testing()
+    message(STATUS "NekoFunction tests enabled")
+
+    if (NOT NEKO_AUTO_FETCH_DEPS)
+        message(FATAL_ERROR "GTest is required for building tests. Please enable NEKO_AUTO_FETCH_DEPS")
+    endif()
+
     add_executable(NekoFunction_test tests/NekoFunction_test.cpp)
     target_include_directories(NekoFunction_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
     target_link_libraries(NekoFunction_test PRIVATE NekoFunction GTest::gtest_main)
     target_compile_features(NekoFunction_test PRIVATE cxx_std_20)
     
-    if(OpenSSL_FOUND)
-        target_link_libraries(NekoFunction_test PRIVATE OpenSSL::SSL OpenSSL::Crypto)
-    endif()
-
-    if(MINIZIP_FOUND AND NEKO_ENABLE_ARCHIVER)
-        target_link_libraries(NekoFunction_test PRIVATE MINIZIP::minizip-ng)
-    endif()
-    
-    # Add the test first
     add_test(NAME NekoFunction_tests COMMAND NekoFunction_test)
-
-    # Print configuration summary for tests
-    message(STATUS "NekoFunction tests enabled")
-    
-    message(STATUS "Test configuration summary:")
-    message(STATUS "  - OpenSSL support: ${OpenSSL_FOUND}")
-    message(STATUS "  - Archiver support: ${minizip-ng_FOUND}")
-    message(STATUS "  - Hash support enabled: ${OpenSSL_FOUND}")
-    message(STATUS "  - Archiver enabled: ${NEKO_ENABLE_ARCHIVER}")
 
     include(GoogleTest)
     gtest_discover_tests(NekoFunction_test)
-
 else()
     message(STATUS "NekoFunction tests disabled (NEKO_BUILD_TESTS=OFF)")
 endif()
