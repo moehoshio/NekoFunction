@@ -153,29 +153,79 @@ jobs:
       if: startsWith(matrix.config.os, 'windows') && matrix.config.cc == 'cl'
       uses: ilammy/msvc-dev-cmd@v1.13.0
     
+    - name: Check OpenSSL installation (Windows)
+      if: startsWith(matrix.config.os, 'windows')
+      run: |
+        Write-Host "=== Checking OpenSSL installation ==="
+        if (Test-Path "C:\Program Files\OpenSSL") {
+          Write-Host "Found: C:\Program Files\OpenSSL"
+          Get-ChildItem "C:\Program Files\OpenSSL" -Recurse -Depth 1 | Select-Object FullName
+        }
+        if (Test-Path "C:\Program Files\OpenSSL-Win64") {
+          Write-Host "Found: C:\Program Files\OpenSSL-Win64"
+          Get-ChildItem "C:\Program Files\OpenSSL-Win64" -Recurse -Depth 1 | Select-Object FullName
+        }
+        if (Test-Path "C:\Progra~1\OpenSSL") {
+          Write-Host "Found: C:\Progra~1\OpenSSL"
+        }
+      shell: powershell
+    
+    - name: Build and install zlib-ng (Windows)
+      if: startsWith(matrix.config.os, 'windows')
+      run: |
+        Write-Host "=== Building zlib-ng ==="
+        cd $env:TEMP
+        git clone --depth 1 --branch 2.2.2 https://github.com/zlib-ng/zlib-ng.git
+        cd zlib-ng
+        mkdir build
+        cd build
+        cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DZLIB_COMPAT=OFF -DZLIB_ENABLE_TESTS=OFF -DCMAKE_INSTALL_PREFIX="C:/Program Files/ZLIBNG"
+        cmake --build . --config Release
+        cmake --install . --config Release
+        Write-Host "zlib-ng installed to: C:/Program Files/ZLIBNG"
+        cd $env:GITHUB_WORKSPACE
+      shell: powershell
+    
     - name: Build and install minizip-ng (Windows)
       if: startsWith(matrix.config.os, 'windows')
       run: |
+        Write-Host "=== Building minizip-ng ==="
         cd $env:TEMP
         git clone --depth 1 --branch 4.0.7 https://github.com/zlib-ng/minizip-ng.git
         cd minizip-ng
         mkdir build
         cd build
-        cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=OFF -DMZ_ZLIB=ON -DMZ_BZIP2=OFF -DMZ_LZMA=OFF -DMZ_ZSTD=OFF -DMZ_OPENSSL=ON
+        # Try to find OpenSSL in common locations
+        $opensslPath = if (Test-Path "C:/Program Files/OpenSSL-Win64") { "C:/Program Files/OpenSSL-Win64" } 
+                       elseif (Test-Path "C:/Program Files/OpenSSL") { "C:/Program Files/OpenSSL" }
+                       else { "C:/Program Files/OpenSSL" }
+        $zlibngPath = "C:/Program Files/ZLIBNG"
+        Write-Host "OpenSSL path: $opensslPath"
+        Write-Host "ZLIBNG path: $zlibngPath"
+        cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=OFF -DMZ_FETCH_LIBS=OFF -DMZ_ZLIB=ON -DMZ_BZIP2=OFF -DMZ_LZMA=OFF -DMZ_ZSTD=OFF -DMZ_OPENSSL=ON -DCMAKE_PREFIX_PATH="$zlibngPath;$opensslPath"
         cmake --build . --config Release
         cmake --install . --config Release
+        Write-Host "minizip-ng installed"
         cd $env:GITHUB_WORKSPACE
       shell: powershell
 
-    - name: Configure CMake
+    - name: Configure CMake (Windows)
+      if: startsWith(matrix.config.os, 'windows')
       run: |
-        if [[ "${{ matrix.config.generators }}" == *"Visual Studio"* ]]; then
-          # For Visual Studio generators, let CMake auto-detect the compiler
-          cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -G "${{ matrix.config.generators }}" -DNEKO_BUILD_TESTS=ON -DNEKO_AUTO_FETCH_DEPS=ON
-        else
-          # For other generators, specify the compiler explicitly
-          cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_BUILD_TESTS=ON -DNEKO_AUTO_FETCH_DEPS=ON
-        fi
+        # Try to find OpenSSL in common locations
+        $opensslPath = if (Test-Path "C:/Program Files/OpenSSL-Win64") { "C:/Program Files/OpenSSL-Win64" } 
+                       elseif (Test-Path "C:/Program Files/OpenSSL") { "C:/Program Files/OpenSSL" }
+                       else { "C:/Program Files/OpenSSL" }
+        $prefixPath = "C:/Program Files/ZLIBNG;$opensslPath;C:/Program Files (x86)/minizip-ng"
+        Write-Host "=== Configuring NekoFunction ==="
+        Write-Host "CMAKE_PREFIX_PATH: $prefixPath"
+        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -G "${{ matrix.config.generators }}" -DNEKO_BUILD_TESTS=ON -DNEKO_AUTO_FETCH_DEPS=ON -DCMAKE_PREFIX_PATH="$prefixPath"
+      shell: powershell
+
+    - name: Configure CMake (Unix)
+      if: "!startsWith(matrix.config.os, 'windows')"
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_BUILD_TESTS=ON -DNEKO_AUTO_FETCH_DEPS=ON
       shell: bash
 
     - name: Verify Hash and Archive Support
