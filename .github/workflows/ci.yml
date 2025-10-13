@@ -79,11 +79,15 @@ jobs:
       with:
         python-version: '3.x'
 
+    # ============================================================================
+    # Ubuntu: Use apt package manager + build minizip-ng from source
+    # ============================================================================
     - name: Install dependencies (Ubuntu)
       if: startsWith(matrix.config.os, 'ubuntu')
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build software-properties-common libssl-dev zlib1g-dev libbz2-dev liblzma-dev libzstd-dev
+        sudo apt-get install -y build-essential cmake ninja-build software-properties-common \
+          libssl-dev zlib1g-dev libbz2-dev liblzma-dev libzstd-dev
         
         # Install GCC-13 from toolchain PPA
         if [[ "${{ matrix.config.cxx }}" == g++-13 ]]; then
@@ -110,22 +114,21 @@ jobs:
         sudo cmake --install .
         cd $GITHUB_WORKSPACE
 
-    - name: Check compiler versions (Debug)
+    - name: Check compiler versions
       if: startsWith(matrix.config.os, 'ubuntu')
       run: |
         echo "=== Compiler Information ==="
         ${{ matrix.config.cxx }} --version
         echo "=== CMake Information ==="
         cmake --version
-        echo "=== Standard Library Check ==="
-        echo '#include <version>' | ${{ matrix.config.cxx }} -std=c++20 -x c++ -E - 2>/dev/null && echo "C++20 headers available" || echo "C++20 headers missing"
-        echo '#include <source_location>' | ${{ matrix.config.cxx }} -std=c++20 -x c++ -E - 2>/dev/null && echo "source_location available" || echo "source_location missing"
-        echo '#include <format>' | ${{ matrix.config.cxx }} -std=c++20 -x c++ -E - 2>/dev/null && echo "format available" || echo "format missing"
 
+    # ============================================================================
+    # macOS: Use Homebrew package manager
+    # ============================================================================
     - name: Install dependencies (macOS)
       if: startsWith(matrix.config.os, 'macos')
       run: |
-        brew install cmake ninja openssl zlib xz zstd
+        brew install cmake ninja openssl@3 zlib xz zstd bzip2
         
         # Build and install minizip-ng from source
         echo "=== Installing minizip-ng ==="
@@ -133,93 +136,66 @@ jobs:
         git clone --depth 1 --branch 4.0.7 https://github.com/zlib-ng/minizip-ng.git
         cd minizip-ng
         mkdir build && cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=OFF -DMZ_ZLIB=ON -DMZ_BZIP2=ON -DMZ_LZMA=ON -DMZ_ZSTD=ON -DMZ_OPENSSL=ON -DCMAKE_PREFIX_PATH="$(brew --prefix openssl)"
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=OFF -DMZ_ZLIB=ON -DMZ_BZIP2=ON -DMZ_LZMA=ON -DMZ_ZSTD=ON -DMZ_OPENSSL=ON \
+          -DCMAKE_PREFIX_PATH="$(brew --prefix openssl@3);$(brew --prefix zlib);$(brew --prefix xz);$(brew --prefix zstd);$(brew --prefix bzip2)"
         cmake --build . --config Release
         sudo cmake --install .
         cd $GITHUB_WORKSPACE
 
-    - name: Install dependencies (Windows)
+    # ============================================================================
+    # Windows: Use default vcpkg
+    # ============================================================================
+    - name: Install dependencies via vcpkg (Windows)
       if: startsWith(matrix.config.os, 'windows')
       run: |
-        choco install openssl --version=3.1.1
-        if ("${{ matrix.config.generators }}" -eq "Ninja") {
-          choco install ninja
-          # Setup Clang
-          choco install llvm
+        Write-Host "=== Installing dependencies via vcpkg ==="
+        $vcpkgRoot = $env:VCPKG_INSTALLATION_ROOT
+        Write-Host "Using vcpkg at: $vcpkgRoot"
+        
+        vcpkg install openssl:x64-windows minizip-ng:x64-windows --recurse
+        Write-Host ""
+        Write-Host "=== Installed packages ==="
+        vcpkg list
+        Write-Host ""
+        Write-Host "=== Verifying installation ==="
+        $installedPath = "$vcpkgRoot\installed\x64-windows"
+        Write-Host "Installed path: $installedPath"
+        if (Test-Path "$installedPath\share\minizip-ng") {
+          Write-Host "minizip-ng CMake files: OK"
+        } else {
+          Write-Host "minizip-ng CMake files: NOT FOUND"
+        }
+        if (Test-Path "$installedPath\share\openssl") {
+          Write-Host "OpenSSL CMake files: OK"
+        } else {
+          Write-Host "OpenSSL CMake files: NOT FOUND"
         }
       shell: powershell
 
     - name: Set up MSVC environment (Windows)
       if: startsWith(matrix.config.os, 'windows') && matrix.config.cc == 'cl'
       uses: ilammy/msvc-dev-cmd@v1.13.0
-    
-    - name: Check OpenSSL installation (Windows)
-      if: startsWith(matrix.config.os, 'windows')
-      run: |
-        Write-Host "=== Checking OpenSSL installation ==="
-        if (Test-Path "C:\Program Files\OpenSSL") {
-          Write-Host "Found: C:\Program Files\OpenSSL"
-          Get-ChildItem "C:\Program Files\OpenSSL" -Recurse -Depth 1 | Select-Object FullName
-        }
-        if (Test-Path "C:\Program Files\OpenSSL-Win64") {
-          Write-Host "Found: C:\Program Files\OpenSSL-Win64"
-          Get-ChildItem "C:\Program Files\OpenSSL-Win64" -Recurse -Depth 1 | Select-Object FullName
-        }
-        if (Test-Path "C:\Progra~1\OpenSSL") {
-          Write-Host "Found: C:\Progra~1\OpenSSL"
-        }
-      shell: powershell
-    
-    - name: Build and install zlib-ng (Windows)
-      if: startsWith(matrix.config.os, 'windows')
-      run: |
-        Write-Host "=== Building zlib-ng ==="
-        cd $env:TEMP
-        git clone --depth 1 --branch 2.2.2 https://github.com/zlib-ng/zlib-ng.git
-        cd zlib-ng
-        mkdir build
-        cd build
-        cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DZLIB_COMPAT=OFF -DZLIB_ENABLE_TESTS=OFF -DCMAKE_INSTALL_PREFIX="C:/Program Files/ZLIBNG"
-        cmake --build . --config Release
-        cmake --install . --config Release
-        Write-Host "zlib-ng installed to: C:/Program Files/ZLIBNG"
-        cd $env:GITHUB_WORKSPACE
-      shell: powershell
-    
-    - name: Build and install minizip-ng (Windows)
-      if: startsWith(matrix.config.os, 'windows')
-      run: |
-        Write-Host "=== Building minizip-ng ==="
-        cd $env:TEMP
-        git clone --depth 1 --branch 4.0.7 https://github.com/zlib-ng/minizip-ng.git
-        cd minizip-ng
-        mkdir build
-        cd build
-        # Try to find OpenSSL in common locations
-        $opensslPath = if (Test-Path "C:/Program Files/OpenSSL-Win64") { "C:/Program Files/OpenSSL-Win64" } 
-                       elseif (Test-Path "C:/Program Files/OpenSSL") { "C:/Program Files/OpenSSL" }
-                       else { "C:/Program Files/OpenSSL" }
-        $zlibngPath = "C:/Program Files/ZLIBNG"
-        Write-Host "OpenSSL path: $opensslPath"
-        Write-Host "ZLIBNG path: $zlibngPath"
-        cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=OFF -DMZ_FETCH_LIBS=OFF -DMZ_ZLIB=ON -DMZ_BZIP2=OFF -DMZ_LZMA=OFF -DMZ_ZSTD=OFF -DMZ_OPENSSL=ON -DCMAKE_PREFIX_PATH="$zlibngPath;$opensslPath"
-        cmake --build . --config Release
-        cmake --install . --config Release
-        Write-Host "minizip-ng installed"
-        cd $env:GITHUB_WORKSPACE
-      shell: powershell
 
+    # ============================================================================
+    # Configure CMake for all platforms
+    # ============================================================================
     - name: Configure CMake (Windows)
       if: startsWith(matrix.config.os, 'windows')
       run: |
-        # Try to find OpenSSL in common locations
-        $opensslPath = if (Test-Path "C:/Program Files/OpenSSL-Win64") { "C:/Program Files/OpenSSL-Win64" } 
-                       elseif (Test-Path "C:/Program Files/OpenSSL") { "C:/Program Files/OpenSSL" }
-                       else { "C:/Program Files/OpenSSL" }
-        $prefixPath = "C:/Program Files/ZLIBNG;$opensslPath;C:/Program Files (x86)/minizip-ng"
-        Write-Host "=== Configuring NekoFunction ==="
-        Write-Host "CMAKE_PREFIX_PATH: $prefixPath"
-        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -G "${{ matrix.config.generators }}" -DNEKO_BUILD_TESTS=ON -DNEKO_AUTO_FETCH_DEPS=ON -DCMAKE_PREFIX_PATH="$prefixPath"
+        Write-Host "=== Configuring NekoFunction (Windows) ==="
+        $vcpkgRoot = $env:VCPKG_INSTALLATION_ROOT
+        $toolchainFile = "$vcpkgRoot\scripts\buildsystems\vcpkg.cmake"
+        $installedPath = "$vcpkgRoot\installed\x64-windows"
+        
+        Write-Host "VCPKG_ROOT: $vcpkgRoot"
+        Write-Host "CMAKE_TOOLCHAIN_FILE: $toolchainFile"
+        Write-Host "CMAKE_PREFIX_PATH: $installedPath"
+        
+        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -G "${{ matrix.config.generators }}" `
+          -DNEKO_BUILD_TESTS=ON -DNEKO_AUTO_FETCH_DEPS=ON `
+          -DCMAKE_TOOLCHAIN_FILE="$toolchainFile" `
+          -DVCPKG_TARGET_TRIPLET=x64-windows `
+          -DCMAKE_PREFIX_PATH="$installedPath"
       shell: powershell
 
     - name: Configure CMake (Unix)

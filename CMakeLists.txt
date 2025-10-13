@@ -12,6 +12,7 @@ option(NEKO_FUNCTION_AUTO_FETCH_DEPS "Neko Function Automatically fetch dependen
 option(NEKO_FUNCTION_ENABLE_ARCHIVER "Neko Function Enable archiver support (requires minizip-ng)" ON)
 option(NEKO_FUNCTION_ENABLE_HASH "Neko Function Enable hash support (requires OpenSSL)" ON)
 
+# Find minizip-ng (vcpkg provides it with standard naming)
 find_package(minizip-ng CONFIG QUIET)
 find_package(OpenSSL QUIET)
 
@@ -20,6 +21,8 @@ find_package(OpenSSL QUIET)
 message(STATUS "Start configuration Neko Function...")
 message(STATUS "NekoFunction configuration summary:")
 message(STATUS "  - CMake version: ${CMAKE_VERSION}")
+message(STATUS "  - CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+message(STATUS "  - CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 message(STATUS "")
 message(STATUS "  - Neko Function Auto fetch deps: ${NEKO_FUNCTION_AUTO_FETCH_DEPS}")
 message(STATUS "  - Neko Function Build tests: ${NEKO_FUNCTION_BUILD_TESTS}")
