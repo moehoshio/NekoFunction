@@ -745,13 +745,13 @@ You can run the tests to verify that everything is working correctly.
 If you haven't configured the build yet, please run:
 
 ```shell
-cmake -B ./build .
+cmake -D NEKO_FUNCTION_BUILD_TESTS=ON -D NEKO_FUNCTION_AUTO_FETCH_DEPS=ON -D NEKO_FUNCTION_LIBRARY_PATH=<path_to_openssl_and_minizip_ng> -B ./build .
 ```
 
 Now, you can build the test files (you must build them manually at least once before running the tests!).
 
 ```shell
-cmake --build ./build -DNEKO_BUILD_TESTS=ON
+cmake --build ./build --config Debug
 ```
 
 Then, you can run the tests with the following commands:
@@ -780,6 +780,7 @@ If everything is set up correctly, you should see output similar to the followin
 
 ## See More
 
+- [NekoNet](https://github.com/moehoshio/NekoNet): A modern , easy-to-use C++20 networking library via libcurl.
 - [NekoLog](https://github.com/moehoshio/NekoLog): An easy-to-use, modern, lightweight, and efficient C++20 logging library.
 - [NekoEvent](https://github.com/moehoshio/NekoEvent): A modern easy to use type-safe and high-performance event handling system for C++.
 - [NekoSchema](https://github.com/moehoshio/NekoSchema): A lightweight, header-only C++20 schema library.
