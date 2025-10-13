@@ -1,14 +1,21 @@
 cmake_minimum_required(VERSION 3.14)
 project(NekoFunction VERSION 1.0 LANGUAGES CXX)
 
-option(NEKO_AUTO_FETCH_DEPS "Automatically fetch dependencies" ON)
-option(NEKO_BUILD_TESTS "Build tests" ON)
-option(NEKO_ENABLE_ARCHIVER "Enable archiver support (requires minizip-ng)" ON)
+# Neko Module common options
+option(NEKO_AUTO_FETCH_DEPS "Neko Automatically fetch dependencies" ON)
+option(NEKO_BUILD_TESTS "Neko Build tests" ON)
+
+# NekoFunction project specific options
+option(NEKO_FUNCTION_BUILD_TESTS "Neko Function Build tests" ON)
+option(NEKO_FUNCTION_AUTO_FETCH_DEPS "Neko Function Automatically fetch dependencies" ON)
+
+option(NEKO_FUNCTION_ENABLE_ARCHIVER "Neko Function Enable archiver support (requires minizip-ng)" ON)
 
 find_package(minizip-ng CONFIG QUIET)
 find_package(OpenSSL QUIET)
 
 # Print configuration summary
+message(STATUS "Start configuration Neko Function")
 message(STATUS "NekoFunction configuration summary:")
 message(STATUS "  - CMake version: ${CMAKE_VERSION}")
 message(STATUS "")
@@ -24,7 +31,7 @@ message(STATUS "  - Hash support enabled: ${OpenSSL_FOUND}")
 message(STATUS "")
 
 
-if(NEKO_AUTO_FETCH_DEPS)
+if(NEKO_AUTO_FETCH_DEPS OR NEKO_FUNCTION_AUTO_FETCH_DEPS)
     include(FetchContent)
     
     FetchContent_Declare(
@@ -34,7 +41,7 @@ if(NEKO_AUTO_FETCH_DEPS)
     )
     FetchContent_MakeAvailable(NekoSchema)
 
-    if(NEKO_BUILD_TESTS)
+    if(NEKO_BUILD_TESTS OR NEKO_FUNCTION_BUILD_TESTS)
         message(STATUS "GTest not found. Fetching GoogleTest...")
 
         FetchContent_Declare(
@@ -49,7 +56,7 @@ if(NEKO_AUTO_FETCH_DEPS)
 endif()
 
 # Main library target
-if(minizip-ng_FOUND AND NEKO_ENABLE_ARCHIVER)
+if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
     add_library(NekoFunction STATIC src/neko/function/archiverZip.cpp)
 else()
     add_library(NekoFunction INTERFACE)
@@ -68,7 +75,7 @@ if(OpenSSL_FOUND)
     target_compile_definitions(NekoFunction INTERFACE NEKO_ENABLE_HASH_SUPPORT)
     target_link_libraries(NekoFunction INTERFACE OpenSSL::SSL OpenSSL::Crypto)
     if(WIN32)
-        if(minizip-ng_FOUND AND NEKO_ENABLE_ARCHIVER)
+        if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
             # STATIC library - use PUBLIC
             target_link_libraries(NekoFunction PUBLIC
                 Crypt32
@@ -91,8 +98,8 @@ if(OpenSSL_FOUND)
     endif()
 endif()
 
-if(minizip-ng_FOUND AND NEKO_ENABLE_ARCHIVER)
-    target_compile_definitions(NekoFunction INTERFACE NEKO_ENABLE_ARCHIVER)
+if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
+    target_compile_definitions(NekoFunction INTERFACE NEKO_FUNCTION_ENABLE_ARCHIVER)
     target_link_libraries(NekoFunction INTERFACE MINIZIP::minizip-ng)
 endif()
 
@@ -102,11 +109,11 @@ endif()
 
 
 # Tests
-if(NEKO_BUILD_TESTS)
+if(NEKO_BUILD_TESTS OR NEKO_FUNCTION_BUILD_TESTS)
     enable_testing()
     message(STATUS "NekoFunction tests enabled")
 
-    if (NOT NEKO_AUTO_FETCH_DEPS)
+    if (NOT NEKO_AUTO_FETCH_DEPS AND NOT NEKO_FUNCTION_AUTO_FETCH_DEPS)
         message(FATAL_ERROR "GTest is required for building tests. Please enable NEKO_AUTO_FETCH_DEPS")
     endif()
 
@@ -122,3 +129,5 @@ if(NEKO_BUILD_TESTS)
 else()
     message(STATUS "NekoFunction tests disabled (NEKO_BUILD_TESTS=OFF)")
 endif()
+
+message(STATUS "End Neko Function")
