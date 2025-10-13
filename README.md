@@ -777,6 +777,24 @@ If everything is set up correctly, you should see output similar to the followin
   Total Test time (real) =   0.21 sec
 ```
 
+### Disable Tests
+
+If you want to disable building and running tests, you can set the following CMake option when configuring your project:
+
+```shell
+cmake -B ./build -DNEKO_FUNCTION_BUILD_TESTS=OFF -S .
+```
+
+or
+
+```shell
+cmake -B ./build -DNEKO_BUILD_TESTS=OFF -S .
+```
+
+(Note: This will disable tests for all Neko modules!)
+
+This will skip test targets during the build process.
+
 ## License
 
 [License](LICENSE) MIT OR Apache-2.0
