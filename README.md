@@ -745,7 +745,10 @@ You can run the tests to verify that everything is working correctly.
 If you haven't configured the build yet, please run:
 
 ```shell
-cmake -D NEKO_FUNCTION_BUILD_TESTS=ON -D NEKO_FUNCTION_AUTO_FETCH_DEPS=ON -D NEKO_FUNCTION_LIBRARY_PATH=<path_to_openssl_and_minizip_ng> -B ./build .
+# Global options
+cmake -D NEKO_BUILD_TESTS=ON -D NEKO_AUTO_FETCH_DEPS=ON -D CMAKE_PREFIX_PATH=<path_to_openssl_and_minizip_ng> -B ./build -S .
+# or specify to Neko Function only
+cmake -D NEKO_FUNCTION_BUILD_TESTS=ON -D NEKO_FUNCTION_AUTO_FETCH_DEPS=ON -D NEKO_FUNCTION_LIBRARY_PATH=<path_to_openssl_and_minizip_ng> -B ./build -S .
 ```
 
 Now, you can build the test files (you must build them manually at least once before running the tests!).

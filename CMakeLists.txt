@@ -31,13 +31,12 @@ endif()
 
 
 # Print configuration summary
-message(STATUS "Start configuration Neko Function")
+message(STATUS "Start configuration Neko Function...")
 message(STATUS "NekoFunction configuration summary:")
 message(STATUS "  - CMake version: ${CMAKE_VERSION}")
 message(STATUS "")
 message(STATUS "  - Neko Function Auto fetch deps: ${NEKO_FUNCTION_AUTO_FETCH_DEPS} common: ${NEKO_AUTO_FETCH_DEPS}")
 message(STATUS "  - Neko Function Build tests: ${NEKO_FUNCTION_BUILD_TESTS} common: ${NEKO_BUILD_TESTS}")
-message(STATUS "  - Neko Function Archiver enabled: ${NEKO_FUNCTION_ENABLE_ARCHIVER}")
 message(STATUS "")
 message(STATUS "Dependency summary:")
 message(STATUS "  - OpenSSL support: ${OpenSSL_FOUND} version: ${OpenSSL_VERSION}")
@@ -58,7 +57,7 @@ if(NEKO_FUNCTION_AUTO_FETCH_DEPS OR (NEKO_AUTO_FETCH_DEPS AND NEKO_FUNCTION_AUTO
     FetchContent_MakeAvailable(NekoSchema)
 
     if(NEKO_BUILD_TESTS OR NEKO_FUNCTION_BUILD_TESTS)
-        message(STATUS "GTest not found. Fetching GoogleTest...")
+        message(STATUS "Neko Function Fetching GoogleTest...")
 
         FetchContent_Declare(
             googletest
@@ -70,7 +69,10 @@ if(NEKO_FUNCTION_AUTO_FETCH_DEPS OR (NEKO_AUTO_FETCH_DEPS AND NEKO_FUNCTION_AUTO
     endif()
 endif()
 
-# Main library target
+# ================
+# = Main target =
+# ================
+
 if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
     add_library(NekoFunction STATIC src/neko/function/archiverZip.cpp)
 else()
@@ -123,7 +125,10 @@ if(MSVC)
 endif()
 
 
-# Tests
+# ================
+# ==== Tests =====
+# ================
+
 if(NEKO_FUNCTION_BUILD_TESTS OR (NEKO_BUILD_TESTS AND NEKO_FUNCTION_BUILD_TESTS))
     enable_testing()
     message(STATUS "NekoFunction tests enabled")
