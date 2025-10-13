@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 project(NekoFunction VERSION 1.0 LANGUAGES CXX)
 
+# ================
+# === Config ====
+# ================
+
 # Neko Module common options
 option(NEKO_AUTO_FETCH_DEPS "Neko Automatically fetch dependencies" ON)
 option(NEKO_BUILD_TESTS "Neko Build tests" ON)
@@ -10,9 +14,21 @@ option(NEKO_FUNCTION_BUILD_TESTS "Neko Function Build tests" ON)
 option(NEKO_FUNCTION_AUTO_FETCH_DEPS "Neko Function Automatically fetch dependencies" ON)
 
 option(NEKO_FUNCTION_ENABLE_ARCHIVER "Neko Function Enable archiver support (requires minizip-ng)" ON)
+option(NEKO_FUNCTION_ENABLE_HASH "Neko Function Enable hash support (requires OpenSSL)" ON)
 
-find_package(minizip-ng CONFIG QUIET)
-find_package(OpenSSL QUIET)
+
+if (DEFINED NEKO_FUNCTION_LIBRARY_PATH)
+    find_package(OpenSSL
+        HINTS "${NEKO_FUNCTION_LIBRARY_PATH}"
+    )
+    find_package(minizip-ng CONFIG
+        HINTS "${NEKO_FUNCTION_LIBRARY_PATH}"
+    )
+else()
+    find_package(minizip-ng CONFIG QUIET)
+    find_package(OpenSSL QUIET)
+endif()
+
 
 # Print configuration summary
 message(STATUS "Start configuration Neko Function")
@@ -25,8 +41,9 @@ message(STATUS "  - Neko Function Archiver enabled: ${NEKO_FUNCTION_ENABLE_ARCHI
 message(STATUS "")
 message(STATUS "Dependency summary:")
 message(STATUS "  - OpenSSL support: ${OpenSSL_FOUND} version: ${OpenSSL_VERSION}")
-message(STATUS "  - Archiver and minizip-ng support: ${minizip-ng_FOUND} version: ${minizip-ng_VERSION}")
-message(STATUS "  - Hash support enabled: ${OpenSSL_FOUND} via OpenSSL")
+message(STATUS "  - minizip-ng support: ${minizip-ng_FOUND} version: ${minizip-ng_VERSION}")
+message(STATUS "  - Archiver support enabled: ${NEKO_FUNCTION_ENABLE_ARCHIVER} via minizip-ng")
+message(STATUS "  - Hash support enabled: ${NEKO_FUNCTION_ENABLE_HASH} via OpenSSL")
 message(STATUS "")
 
 
@@ -70,7 +87,7 @@ target_link_libraries(NekoFunction INTERFACE NekoSchema)
 target_compile_features(NekoFunction INTERFACE cxx_std_20)
 
 if(OpenSSL_FOUND)
-    target_compile_definitions(NekoFunction INTERFACE NEKO_FUNCTION_ENABLE_HASH_SUPPORT NEKO_IMPORT_OPENSSL)
+    target_compile_definitions(NekoFunction INTERFACE NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
     target_link_libraries(NekoFunction INTERFACE OpenSSL::SSL OpenSSL::Crypto)
     if(WIN32)
         if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)

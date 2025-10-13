@@ -39,7 +39,7 @@
 #include <vector>
 
 
-#if defined(NEKO_FUNCTION_ENABLE_HASH_SUPPORT)
+#if defined(NEKO_FUNCTION_ENABLE_HASH)
 
 // Include OpenSSL headers for hash functions
 #if defined(NEKO_IMPORT_OPENSSL)
@@ -47,10 +47,10 @@
 #include <openssl/sha.h>
 
 #else
-#undef NEKO_FUNCTION_ENABLE_HASH_SUPPORT // If no supported hash functions are available, undefine the macro
+#undef NEKO_FUNCTION_ENABLE_HASH // If no supported hash functions are available, undefine the macro
 #endif
 
-#endif // NEKO_FUNCTION_ENABLE_HASH_SUPPORT
+#endif // NEKO_FUNCTION_ENABLE_HASH
 
 /**
  * @namespace neko::ops
@@ -798,7 +798,7 @@ namespace neko::util {
         }
     } // namespace check
 
-#if defined(NEKO_FUNCTION_ENABLE_HASH_SUPPORT)
+#if defined(NEKO_FUNCTION_ENABLE_HASH)
 
     /**
      * @namespace neko::util::hash
@@ -908,14 +908,14 @@ namespace neko::util {
 
     } // namespace hash
 
-#endif // NEKO_FUNCTION_ENABLE_HASH_SUPPORT
+#endif // NEKO_FUNCTION_ENABLE_HASH
 
     /**
      * @namespace neko::util::uuid
      * @brief UUID generation and manipulation utilities.
      */
     namespace uuid {
-#if defined(NEKO_ENABLE_HASH_SUPPORT)
+#if defined(NEKO_FUNCTION_ENABLE_HASH)
 
 #if defined(NEKO_IMPORT_OPENSSL)
         /**
@@ -991,7 +991,7 @@ namespace neko::util {
         }
 #endif // NEKO_IMPORT_OPENSSL
 
-#endif // NEKO_ENABLE_HASH_SUPPORT
+#endif // NEKO_FUNCTION_ENABLE_HASH
 
         /**
          * @brief Generates a version 4 (random) UUID.

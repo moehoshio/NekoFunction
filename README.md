@@ -62,16 +62,49 @@ NekoFunction integrates multiple functional modules including utilities, archive
 
 - C++20 or higher compatible compiler
 - CMake 3.14 or higher (if using CMake)
+- Git
 
 ### Archive Management (Optional)
 
-Archive management features will be automatically enabled if minizip-ng is installed.  
-Please ensure minizip-ng headers are in your include path and link the library.
+To enable Archive support, set the `NEKO_FUNCTION_ENABLE_ARCHIVER` variable to `ON` (default), and install [minizip-ng](https://github.com/nmoinvaz/minizip-ng). Then configure CMake to search for your minizip-ng installation path.
+
+Set the `CMAKE_PREFIX_PATH` or `NEKO_FUNCTION_LIBRARY_PATH` variable to your minizip-ng installation directory.
+
+```shell
+cmake -D NEKO_FUNCTION_ENABLE_ARCHIVER=ON -D CMAKE_PREFIX_PATH=/path/to/your/minizip-ng -B ./build -S .
+# or
+cmake -D NEKO_FUNCTION_ENABLE_ARCHIVER=ON -D NEKO_FUNCTION_LIBRARY_PATH=/path/to/your/minizip-ng -B ./build -S .
+```
+
+If minizip-ng is found, you should see output similar to:
+
+```shell
+-- Dependency summary:
+    ...
+--   - minizip-ng support: TRUE version: 4.0.1
+--   - Archiver support enabled: TRUE via minizip-ng
+    ...
+```
 
 ### Hash Support (Optional)
 
-Hash support will be automatically enabled if OpenSSL is installed.  
-Please ensure OpenSSL headers are in your include path and link the library.
+To enable Hash support, set the `NEKO_FUNCTION_ENABLE_HASH` variable to `ON` (default), and install [OpenSSL](https://www.openssl.org/). Then configure CMake to search for your OpenSSL installation path.
+
+```shell
+cmake -D NEKO_FUNCTION_ENABLE_HASH=ON -D CMAKE_PREFIX_PATH=/path/to/your/openssl -B ./build -S .
+# or
+cmake -D NEKO_FUNCTION_ENABLE_HASH=ON -D NEKO_FUNCTION_LIBRARY_PATH=/path/to/your/openssl -B ./build -S .
+```
+
+if OpenSSL is found, you should see output similar to:
+
+```shell
+-- Dependency summary:
+    ...
+--   - OpenSSL support: TRUE version: 3.0.10
+--   - Hash support enabled: TRUE via OpenSSL
+    ...
+```
 
 ## Quick Start
 

@@ -8,7 +8,7 @@
 #include <neko/function/detectFileType.hpp>
 #include <neko/function/pattern.hpp>
 
-#ifdef NEKO_ENABLE_ARCHIVER
+#ifdef NEKO_FUNCTION_ENABLE_ARCHIVER
 #include <neko/function/archiver.hpp>
 #endif
 
@@ -162,7 +162,7 @@ int main() {
     #endif
     
     // Test archiver if available
-    #ifdef NEKO_ENABLE_ARCHIVER
+    #ifdef NEKO_FUNCTION_ENABLE_ARCHIVER
     {
         std::cout << "[INFO] Archiver support available" << std::endl;
         
