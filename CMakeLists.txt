@@ -5,10 +5,6 @@ project(NekoFunction VERSION 1.0 LANGUAGES CXX)
 # === Config ====
 # ================
 
-# Neko Module common options
-option(NEKO_AUTO_FETCH_DEPS "Neko Automatically fetch dependencies" ON)
-option(NEKO_BUILD_TESTS "Neko Build tests" ON)
-
 # NekoFunction project specific options
 option(NEKO_FUNCTION_BUILD_TESTS "Neko Function Build tests" ON)
 option(NEKO_FUNCTION_AUTO_FETCH_DEPS "Neko Function Automatically fetch dependencies" ON)
@@ -35,8 +31,8 @@ message(STATUS "Start configuration Neko Function...")
 message(STATUS "NekoFunction configuration summary:")
 message(STATUS "  - CMake version: ${CMAKE_VERSION}")
 message(STATUS "")
-message(STATUS "  - Neko Function Auto fetch deps: ${NEKO_FUNCTION_AUTO_FETCH_DEPS} common: ${NEKO_AUTO_FETCH_DEPS}")
-message(STATUS "  - Neko Function Build tests: ${NEKO_FUNCTION_BUILD_TESTS} common: ${NEKO_BUILD_TESTS}")
+message(STATUS "  - Neko Function Auto fetch deps: ${NEKO_FUNCTION_AUTO_FETCH_DEPS}")
+message(STATUS "  - Neko Function Build tests: ${NEKO_FUNCTION_BUILD_TESTS}")
 message(STATUS "")
 message(STATUS "Dependency summary:")
 message(STATUS "  - OpenSSL support: ${OpenSSL_FOUND} version: ${OpenSSL_VERSION}")
@@ -46,7 +42,7 @@ message(STATUS "  - Hash support enabled: ${NEKO_FUNCTION_ENABLE_HASH} via OpenS
 message(STATUS "")
 
 
-if(NEKO_FUNCTION_AUTO_FETCH_DEPS OR (NEKO_AUTO_FETCH_DEPS AND NEKO_FUNCTION_AUTO_FETCH_DEPS))
+if(NEKO_FUNCTION_AUTO_FETCH_DEPS)
     include(FetchContent)
     
     FetchContent_Declare(
@@ -129,12 +125,12 @@ endif()
 # ==== Tests =====
 # ================
 
-if(NEKO_FUNCTION_BUILD_TESTS OR (NEKO_BUILD_TESTS AND NEKO_FUNCTION_BUILD_TESTS))
+if(NEKO_FUNCTION_BUILD_TESTS)
     enable_testing()
     message(STATUS "NekoFunction tests enabled")
 
-    if (NOT NEKO_AUTO_FETCH_DEPS AND NOT NEKO_FUNCTION_AUTO_FETCH_DEPS)
-        message(FATAL_ERROR "GTest is required for building tests. Please enable NEKO_AUTO_FETCH_DEPS or NEKO_FUNCTION_AUTO_FETCH_DEPS")
+    if (NOT NEKO_FUNCTION_AUTO_FETCH_DEPS)
+        message(FATAL_ERROR "GTest is required for building tests. Please enable NEKO_FUNCTION_AUTO_FETCH_DEPS")
     endif()
 
     add_executable(NekoFunction_test tests/NekoFunction_test.cpp)
