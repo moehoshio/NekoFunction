@@ -69,52 +69,47 @@ endif()
 # = Main target =
 # ================
 
-if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
+if(NEKO_FUNCTION_ENABLE_ARCHIVER OR NEKO_FUNCTION_ENABLE_HASH)
+
     add_library(NekoFunction STATIC src/neko/function/archiverZip.cpp)
+    
+    target_include_directories(NekoFunction PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_features(NekoFunction PUBLIC cxx_std_20)
+    target_link_libraries(NekoFunction PUBLIC NekoSchema)
+    if (OpenSSL_FOUND AND NEKO_FUNCTION_ENABLE_HASH)
+        target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
+        target_link_libraries(NekoFunction PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+        # static link on Windows
+        if (WIN32)
+            target_compile_definitions(NekoFunction PUBLIC OPENSSL_USE_STATIC_LIBS)
+            target_link_libraries(NekoFunction PUBLIC
+            Crypt32
+            ws2_32
+            advapi32
+            user32
+            bcrypt
+        )
+        endif()
+        
+    endif(OpenSSL_FOUND AND NEKO_FUNCTION_ENABLE_HASH)
+
+    if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
+        target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVER)
+        target_link_libraries(NekoFunction PUBLIC MINIZIP::minizip-ng)
+
+    endif()
+    
 else()
     add_library(NekoFunction INTERFACE)
+    target_include_directories(NekoFunction INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+    )
+    target_link_libraries(NekoFunction INTERFACE NekoSchema)
+    target_compile_features(NekoFunction INTERFACE cxx_std_20)
 endif()
+
 add_library(Neko::Function ALIAS NekoFunction)
-
-target_include_directories(NekoFunction INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(NekoFunction INTERFACE NekoSchema)
-target_compile_features(NekoFunction INTERFACE cxx_std_20)
-
-if(OpenSSL_FOUND)
-    target_compile_definitions(NekoFunction INTERFACE NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
-    target_link_libraries(NekoFunction INTERFACE OpenSSL::SSL OpenSSL::Crypto)
-    if(WIN32)
-        if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
-            # STATIC library - use PUBLIC
-            target_link_libraries(NekoFunction PUBLIC
-                Crypt32
-                ws2_32
-                advapi32
-                user32
-                bcrypt
-            )
-        else()
-            # INTERFACE library - use INTERFACE
-            target_link_libraries(NekoFunction INTERFACE
-                Crypt32
-                ws2_32
-                advapi32
-                user32
-                bcrypt
-            )
-        endif()
-        message(STATUS "Linking Windows system libraries for OpenSSL static build")
-    endif()
-endif()
-
-if(minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
-    target_compile_definitions(NekoFunction INTERFACE NEKO_FUNCTION_ENABLE_ARCHIVER)
-    target_link_libraries(NekoFunction INTERFACE MINIZIP::minizip-ng)
-endif()
 
 if(MSVC)
     target_compile_options(NekoFunction INTERFACE /Zc:__cplusplus)
@@ -134,6 +129,12 @@ if(NEKO_FUNCTION_BUILD_TESTS)
     endif()
 
     add_executable(NekoFunction_test tests/NekoFunction_test.cpp)
+    if(OpenSSL_FOUND AND NEKO_FUNCTION_ENABLE_HASH)
+        target_link_libraries(NekoFunction_test PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+    endif()
+    if (minizip-ng_FOUND AND NEKO_FUNCTION_ENABLE_ARCHIVER)
+        target_link_libraries(NekoFunction_test PRIVATE MINIZIP::minizip-ng)
+    endif()
     target_include_directories(NekoFunction_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
     target_link_libraries(NekoFunction_test PRIVATE NekoFunction GTest::gtest_main)
     target_compile_features(NekoFunction_test PRIVATE cxx_std_20)

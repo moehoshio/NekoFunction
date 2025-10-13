@@ -17,7 +17,7 @@ namespace neko::util::pattern {
      * @param pat The pattern string.
      * @return True if the pattern is a directory, false otherwise.
      */
-    bool isPatternDir(const std::string &pat) {
+    inline bool isPatternDir(const std::string &pat) {
         return !pat.empty() && pat.back() == '/';
     }
 
@@ -26,7 +26,7 @@ namespace neko::util::pattern {
      * @param pattern The pattern string.
      * @return True if the pattern contains '*', false otherwise.
      */
-    bool containsWildcard(const std::string &pattern) {
+    inline bool containsWildcard(const std::string &pattern) {
         return pattern.find('*') != std::string::npos;
     }
 
@@ -35,7 +35,7 @@ namespace neko::util::pattern {
      * @param pattern The pattern string.
      * @return True if the pattern is an extension pattern, false otherwise.
      */
-    bool isExtensionPattern(const std::string &pattern) {
+    inline bool isExtensionPattern(const std::string &pattern) {
         return !pattern.empty() && pattern[0] == '.' && pattern.find('/', 0) == std::string::npos;
     }
 
@@ -44,7 +44,7 @@ namespace neko::util::pattern {
      * @param pattern The wildcard pattern.
      * @return The equivalent regex string.
      */
-    std::string wildcardToRegexString(const std::string &pattern) {
+    inline std::string wildcardToRegexString(const std::string &pattern) {
         std::string regexStr = "";
 
         for (char c : pattern) {
@@ -84,7 +84,7 @@ namespace neko::util::pattern {
      * @param pattern The wildcard pattern.
      * @return True if the target matches the pattern, false otherwise.
      */
-    bool matchWildcardPattern(const std::string &target, const std::string &pattern) {
+    inline bool matchWildcardPattern(const std::string &target, const std::string &pattern) {
         if (pattern == "*")
             return true;
 
@@ -153,7 +153,7 @@ namespace neko::util::pattern {
      * @param pattern The extension pattern (e.g., ".txt").
      * @return True if the file extension matches the pattern, false otherwise.
      */
-    bool matchExtension(const std::string &target, const std::string &pattern) {
+    inline bool matchExtension(const std::string &target, const std::string &pattern) {
         std::string targetExtension = std::filesystem::path(target).extension().string();
         return targetExtension == pattern;
     }
@@ -164,7 +164,7 @@ namespace neko::util::pattern {
      * @param pattern The absolute pattern.
      * @return True if the target matches the pattern, false otherwise.
      */
-    bool matchAbsolutePattern(const std::string &target, const std::string &pattern) {
+    inline bool matchAbsolutePattern(const std::string &target, const std::string &pattern) {
         return target == pattern;
     }
 
@@ -174,7 +174,7 @@ namespace neko::util::pattern {
      * @param dirPattern The absolute directory pattern.
      * @return True if the target is under the directory, false otherwise.
      */
-    bool isTargetUnderAbsoluteDir(const std::string &target, const std::string &dirPattern) {
+    inline bool isTargetUnderAbsoluteDir(const std::string &target, const std::string &dirPattern) {
         std::string dir = dirPattern;
         if (!dir.empty() && dir.back() == '/') {
             dir.pop_back(); // Remove trailing slash for prefix comparison
@@ -191,7 +191,7 @@ namespace neko::util::pattern {
      * @param pattern The pattern to check.
      * @return True if the target ends with the pattern, false otherwise.
      */
-    bool doesTargetEndWithPattern(const std::string &target, const std::string &pattern) {
+    inline bool doesTargetEndWithPattern(const std::string &target, const std::string &pattern) {
         return target.size() >= pattern.size() &&
                target.substr(target.size() - pattern.size()) == pattern &&
                (target.size() == pattern.size() || target[target.size() - pattern.size() - 1] == '/');
@@ -203,7 +203,7 @@ namespace neko::util::pattern {
      * @param dirName The directory name to search for.
      * @return True if the directory name is found in the path, false otherwise.
      */
-    bool containsDirectoryName(const std::string &target, const std::string &dirName) {
+    inline bool containsDirectoryName(const std::string &target, const std::string &dirName) {
         std::string dirToFind = dirName;
         if (!dirToFind.empty() && dirToFind.back() == '/') {
             dirToFind.pop_back(); // Remove trailing slash
@@ -232,7 +232,7 @@ namespace neko::util::pattern {
      * @param patterns A vector of pattern strings.
      * @return True if the target matches any pattern, false otherwise.
      */
-    bool matchAny(const std::string &target, const std::vector<std::string> &patterns) {
+    inline bool matchAny(const std::string &target, const std::vector<std::string> &patterns) {
         std::string normalizedTarget = std::filesystem::path(target).lexically_normal().generic_string();
         std::string filename = std::filesystem::path(target).filename().string();
 

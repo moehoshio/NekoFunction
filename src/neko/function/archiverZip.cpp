@@ -77,7 +77,7 @@ namespace neko::archive::zip {
         ZipReader reader;
         neko::int32 err = mz_zip_reader_open_file(reader.get(), config.inputArchivePath.c_str());
         if (err != MZ_OK)
-            throw ex::FileError("Failed to open zip file for reading: " + config.inputArchivePath, ex::ExceptionExtensionInfo{});
+            throw ex::FileError("Failed to open zip file for reading: " + config.inputArchivePath);
 
         if (!config.password.empty()) {
             mz_zip_reader_set_password(reader.get(), config.password.c_str());
@@ -100,7 +100,7 @@ namespace neko::archive::zip {
             if (!skip) {
                 std::string out_path = (std::filesystem::path(config.destDir) / filename).string();
                 if (file_info && (file_info->flag & MZ_ZIP_FLAG_ENCRYPTED) && config.password.empty())
-                    throw ex::FileError("Encrypted file requires password: " + filename, ex::ExceptionExtensionInfo{});
+                    throw ex::FileError("Encrypted file requires password: " + filename);
 
                 if (file_info && file_info->filename[strlen(file_info->filename) - 1] == '/') {
                     std::filesystem::create_directories(out_path);
@@ -114,7 +114,7 @@ namespace neko::archive::zip {
                     // Extract file
                     err = mz_zip_reader_entry_save_file(reader.get(), out_path.c_str());
                     if (err != MZ_OK)
-                        throw ex::FileError("Failed to extract file: " + filename, ex::ExceptionExtensionInfo{});
+                        throw ex::FileError("Failed to extract file: " + filename);
                 }
             }
             entry_status = mz_zip_reader_goto_next_entry(reader.get());
@@ -125,7 +125,7 @@ namespace neko::archive::zip {
         ZipWriter writer;
         neko::int32 err = mz_zip_writer_open_file(writer.get(), config.outputArchivePath.c_str(), 0, 0);
         if (err != MZ_OK)
-            throw ex::FileError("Failed to open zip file for writing: " + config.outputArchivePath, ex::ExceptionExtensionInfo{});
+            throw ex::FileError("Failed to open zip file for writing: " + config.outputArchivePath);
 
         if (!config.password.empty()) {
             mz_zip_writer_set_password(writer.get(), config.password.c_str());
@@ -152,7 +152,7 @@ namespace neko::archive::zip {
                         continue;
                     err = mz_zip_writer_add_file(writer.get(), p.path().string().c_str(), filePath.c_str());
                     if (err != MZ_OK)
-                        throw ex::FileError("Failed to add file: " + filePath + " in zip: " + config.outputArchivePath, ex::ExceptionExtensionInfo{});
+                        throw ex::FileError("Failed to add file: " + filePath + " in zip: " + config.outputArchivePath);
                 }
             } else {
                 std::string filePath = std::filesystem::path(input).filename().string();
@@ -160,7 +160,7 @@ namespace neko::archive::zip {
                     continue;
                 err = mz_zip_writer_add_file(writer.get(), input.c_str(), filePath.c_str());
                 if (err != MZ_OK)
-                    throw ex::FileError("Failed to add file: " + filePath + " in zip: " + config.outputArchivePath, ex::ExceptionExtensionInfo{});
+                    throw ex::FileError("Failed to add file: " + filePath + " in zip: " + config.outputArchivePath);
             }
         }
     }

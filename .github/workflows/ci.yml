@@ -83,7 +83,7 @@ jobs:
       if: startsWith(matrix.config.os, 'ubuntu')
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build software-properties-common
+        sudo apt-get install -y build-essential cmake ninja-build software-properties-common libssl-dev zlib1g-dev
         
         # Install GCC-13 from toolchain PPA
         if [[ "${{ matrix.config.cxx }}" == g++-13 ]]; then
@@ -114,11 +114,12 @@ jobs:
     - name: Install dependencies (macOS)
       if: startsWith(matrix.config.os, 'macos')
       run: |
-        brew install cmake ninja
+        brew install cmake ninja openssl zlib
 
     - name: Install dependencies (Windows)
       if: startsWith(matrix.config.os, 'windows')
       run: |
+        choco install openssl --version=3.1.1
         if ("${{ matrix.config.generators }}" -eq "Ninja") {
           choco install ninja
           # Setup Clang
@@ -137,6 +138,21 @@ jobs:
         else
           # For other generators, specify the compiler explicitly
           cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_BUILD_TESTS=ON -DNEKO_AUTO_FETCH_DEPS=ON
+        fi
+      shell: bash
+
+    - name: Verify Hash and Archive Support
+      run: |
+        echo "=== NekoFunction Configuration Check ==="
+        if grep -q "Hash support enabled: ON" build/CMakeCache.txt 2>/dev/null || grep -rq "Hash support enabled: ON" build/ 2>/dev/null; then
+          echo "✓ Hash support is ENABLED"
+        else
+          echo "✗ Hash support is DISABLED or not found"
+        fi
+        if grep -q "Archiver support enabled: ON" build/CMakeCache.txt 2>/dev/null || grep -rq "Archiver support enabled: ON" build/ 2>/dev/null; then
+          echo "✓ Archiver support is ENABLED"
+        else
+          echo "✗ Archiver support is DISABLED or not found"
         fi
       shell: bash
 

@@ -182,7 +182,7 @@ int main() {
             zip::create(config);
             test.test(std::filesystem::exists("test.zip"), "Archive creation");
             
-            bool isZip = zip::isZipFile("test.zip");
+            bool isZip = zip::isZipArchiveFile("test.zip");
             test.test(isZip, "ZIP detection");
             
             // Cleanup
