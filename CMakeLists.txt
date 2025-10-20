@@ -21,24 +21,32 @@ if (DEFINED NEKO_FUNCTION_LIBRARY_PATH)
     find_package(minizip-ng CONFIG
         HINTS "${NEKO_FUNCTION_LIBRARY_PATH}"
     )
+    find_package(GTest CONFIG 
+        HINTS "${NEKO_FUNCTION_LIBRARY_PATH}"
+        QUIET
+    )
 else()
     find_package(minizip-ng CONFIG QUIET)
     find_package(OpenSSL QUIET)
+    find_package(GTest CONFIG QUIET)
 endif()
 
 # Print configuration summary
 message(STATUS "Start configuration Neko Function...")
-message(STATUS "NekoFunction configuration summary:")
+message(STATUS "")
+message(STATUS "Neko Function configuration summary:")
 message(STATUS "  - CMake version: ${CMAKE_VERSION}")
 message(STATUS "  - CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 message(STATUS "  - CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+message(STATUS "  - NEKO_FUNCTION_LIBRARY_PATH: ${NEKO_FUNCTION_LIBRARY_PATH}")
 message(STATUS "")
 message(STATUS "  - Neko Function Auto fetch deps: ${NEKO_FUNCTION_AUTO_FETCH_DEPS}")
 message(STATUS "  - Neko Function Build tests: ${NEKO_FUNCTION_BUILD_TESTS}")
 message(STATUS "")
-message(STATUS "Dependency summary:")
+message(STATUS "Neko Function Dependency summary:")
 message(STATUS "  - OpenSSL support: ${OpenSSL_FOUND} version: ${OpenSSL_VERSION}")
 message(STATUS "  - minizip-ng support: ${minizip-ng_FOUND} version: ${minizip-ng_VERSION}")
+message(STATUS "  - GTest : ${GTest_FOUND} version : ${GTest_VERSION}")
 message(STATUS "  - Archiver support enabled: ${NEKO_FUNCTION_ENABLE_ARCHIVER} via minizip-ng")
 message(STATUS "  - Hash support enabled: ${NEKO_FUNCTION_ENABLE_HASH} via OpenSSL")
 message(STATUS "")
@@ -54,13 +62,13 @@ if(NEKO_FUNCTION_AUTO_FETCH_DEPS)
     )
     FetchContent_MakeAvailable(NekoSchema)
 
-    if(NEKO_BUILD_TESTS OR NEKO_FUNCTION_BUILD_TESTS)
-        message(STATUS "Neko Function Fetching GoogleTest...")
+    if(NOT GTEST_FOUND AND NEKO_FUNCTION_BUILD_TESTS)
+        message(STATUS "GTest not found; Neko Function Fetching GoogleTest...")
 
         FetchContent_Declare(
             googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG        release-1.12.1
+            GIT_TAG        v1.17.0
         )
         set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
         FetchContent_MakeAvailable(googletest)
@@ -124,15 +132,17 @@ endif()
 
 if(NEKO_FUNCTION_BUILD_TESTS)
     enable_testing()
-    message(STATUS "NekoFunction tests enabled")
+    message(STATUS "NekoFunction tests enabled (NEKO_FUNCTION_BUILD_TESTS=ON)")
 
-    if (NOT NEKO_FUNCTION_AUTO_FETCH_DEPS)
-        message(FATAL_ERROR "GTest is required for building tests. Please enable NEKO_FUNCTION_AUTO_FETCH_DEPS")
+    if (NOT GTEST_FOUND AND NOT NEKO_FUNCTION_AUTO_FETCH_DEPS)
+        message(STATUS "GTest is required for building tests but was not found.")
+        message(FATAL_ERROR "Please enable -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON or install GTest and make it discoverable by CMake. e.g -DCMAKE_PREFIX_PATH=</path/to/googletest>")
     endif()
+    
 
     add_executable(NekoFunction_test tests/NekoFunction_test.cpp)
     target_include_directories(NekoFunction_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    target_link_libraries(NekoFunction_test PRIVATE NekoFunction GTest::gtest_main)
+    target_link_libraries(NekoFunction_test PRIVATE NekoFunction GTest::gtest GTest::gtest_main)
     target_compile_features(NekoFunction_test PRIVATE cxx_std_20)
     
     add_test(NAME NekoFunction_tests COMMAND NekoFunction_test)
@@ -140,7 +150,7 @@ if(NEKO_FUNCTION_BUILD_TESTS)
     include(GoogleTest)
     gtest_discover_tests(NekoFunction_test)
 else()
-    message(STATUS "NekoFunction tests disabled (NEKO_BUILD_TESTS=OFF)")
+    message(STATUS "NekoFunction tests disabled (NEKO_FUNCTION_BUILD_TESTS=OFF)")
 endif()
 
-message(STATUS "End Neko Function")
+message(STATUS "Neko Function End of configuration")
