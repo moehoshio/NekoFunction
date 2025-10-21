@@ -148,8 +148,8 @@ if(NEKO_FUNCTION_BUILD_TESTS)
     message(STATUS "NekoFunction tests enabled (NEKO_FUNCTION_BUILD_TESTS=ON)")
 
     if (NOT GTEST_FOUND AND NOT NEKO_FUNCTION_AUTO_FETCH_DEPS)
-        message(STATUS "GTest is required for building tests but was not found.")
-        message(FATAL_ERROR "Please enable -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON or install GTest and make it discoverable by CMake. e.g -DCMAKE_PREFIX_PATH=</path/to/googletest>")
+        message(WARNING "GTest is required for building tests but was not found.")
+        message(FATAL_ERROR "Please enable -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON or install GTest and make it discoverable by CMake. use -DNEKO_FUNCTION_LIBRARY_PATH=</path/to/gtest>")
     endif()
     
 

@@ -108,7 +108,7 @@ if OpenSSL is found, you should see output similar to:
 
 ## Quick Start
 
-Configure: [CMake](#cmake) | [Manual](#manual) | [Test](#test)
+Configure: [CMake](#cmake) | [Manual](#manual) | [Static Linking](#static-linking) | [Test](#test)
 
 Usage:
 - [Core Utilities](#core-utilities)
@@ -217,6 +217,15 @@ cp -r NekoFunction/include/ /path/to/your/include/
 
 // Pattern matching
 #include <neko/function/pattern.hpp>
+```
+
+### Static Linking
+
+If you want to use static linking, make sure all libraries (OpenSSL, libcurl..) are built as static libraries. (NekoFunction itself is always a static library)
+Enable the static linking option in your CMake configuration:
+
+```bash
+cmake -B ./build . -DNEKO_FUNCTION_STATIC_LINK=ON -DNEKO_FUNCTION_LIBRARY_PATH="/path/to/x64-windows-static" -S .
 ```
 
 ## Core Utilities
