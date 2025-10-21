@@ -1,4 +1,4 @@
-name: CI
+name: Neko Function CI
 
 on:
   push:
@@ -80,7 +80,7 @@ jobs:
         python-version: '3.x'
 
     - name: Check compiler versions (Unix)
-      if: startsWith(matrix.config.os, 'ubuntu', 'macos')
+      if: "!startsWith(matrix.config.os, 'windows')"
       run: |
         echo "=== Compiler Information ==="
         ${{ matrix.config.cxx }} --version
@@ -91,7 +91,7 @@ jobs:
     # Install vcpkg (Unix)
     # ============================================================================
     - name: Install vcpkg (Unix)
-      if: startsWith(matrix.config.os, 'ubuntu', 'macos')
+      if: "!startsWith(matrix.config.os, 'windows')"
       run: |
         echo "=== Installing Vcpkg ==="
         git clone https://github.com/microsoft/vcpkg.git ~/vcpkg
@@ -104,7 +104,7 @@ jobs:
     # Install packages via vcpkg (Unix)
     # ============================================================================
     - name: Install dependencies via vcpkg (Unix)
-      if: startsWith(matrix.config.os, 'ubuntu', 'macos')
+      if: "!startsWith(matrix.config.os, 'windows')"
       run: |
         echo "=== Installing dependencies via vcpkg ==="
         ~/vcpkg/vcpkg install zlib openssl minizip-ng
