@@ -16,7 +16,7 @@ jobs:
         config:
           # Windows builds
           - {
-              name: "Windows MSVC 2022 Debug",
+              name: "Windows MSVC Debug",
               os: windows-latest,
               cc: "cl",
               cxx: "cl",
@@ -24,7 +24,7 @@ jobs:
               generators: "Visual Studio 17 2022"
             }
           - {
-              name: "Windows MSVC 2022 Release",
+              name: "Windows MSVC Release",
               os: windows-latest,
               cc: "cl",
               cxx: "cl",
@@ -79,43 +79,8 @@ jobs:
       with:
         python-version: '3.x'
 
-    # ============================================================================
-    # Ubuntu: Use apt package manager + build minizip-ng from source
-    # ============================================================================
-    - name: Install dependencies (Ubuntu)
-      if: startsWith(matrix.config.os, 'ubuntu')
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build software-properties-common \
-          libssl-dev zlib1g-dev libbz2-dev liblzma-dev libzstd-dev
-        
-        # Install GCC-13 from toolchain PPA
-        if [[ "${{ matrix.config.cxx }}" == g++-13 ]]; then
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          sudo apt-get update
-          sudo apt-get install -y gcc-13 g++-13
-        # Install Clang-16 from LLVM APT repository
-        elif [[ "${{ matrix.config.cxx }}" == clang++-16 ]]; then
-          wget -O - https://apt.llvm.org/llvm.sh | sudo bash -s -- 16
-          sudo apt-get install -y clang-16 clang++-16
-        # Install other Clang versions
-        elif [[ "${{ matrix.config.cxx }}" == clang* ]]; then
-          sudo apt-get install -y ${{ matrix.config.cxx }}
-        fi
-        
-        # Build and install minizip-ng from source
-        echo "=== Installing minizip-ng ==="
-        cd /tmp
-        git clone --depth 1 --branch 4.0.7 https://github.com/zlib-ng/minizip-ng.git
-        cd minizip-ng
-        mkdir build && cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=OFF -DMZ_ZLIB=ON -DMZ_BZIP2=ON -DMZ_LZMA=ON -DMZ_ZSTD=ON -DMZ_OPENSSL=ON
-        cmake --build . --config Release
-        sudo cmake --install .
-        cd $GITHUB_WORKSPACE
-
-    - name: Check compiler versions
-      if: startsWith(matrix.config.os, 'ubuntu')
+    - name: Check compiler versions (Unix)
+      if: startsWith(matrix.config.os, 'ubuntu', 'macos')
       run: |
         echo "=== Compiler Information ==="
         ${{ matrix.config.cxx }} --version
@@ -123,24 +88,26 @@ jobs:
         cmake --version
 
     # ============================================================================
-    # macOS: Use Homebrew package manager
+    # Install vcpkg (Unix)
     # ============================================================================
-    - name: Install dependencies (macOS)
-      if: startsWith(matrix.config.os, 'macos')
+    - name: Install vcpkg (Unix)
+      if: startsWith(matrix.config.os, 'ubuntu', 'macos')
       run: |
-        brew install cmake ninja openssl@3 zlib xz zstd bzip2
-        
-        # Build and install minizip-ng from source
-        echo "=== Installing minizip-ng ==="
-        cd /tmp
-        git clone --depth 1 --branch 4.0.7 https://github.com/zlib-ng/minizip-ng.git
-        cd minizip-ng
-        mkdir build && cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=OFF -DMZ_ZLIB=ON -DMZ_BZIP2=ON -DMZ_LZMA=ON -DMZ_ZSTD=ON -DMZ_OPENSSL=ON \
-          -DCMAKE_PREFIX_PATH="$(brew --prefix openssl@3);$(brew --prefix zlib);$(brew --prefix xz);$(brew --prefix zstd);$(brew --prefix bzip2)"
-        cmake --build . --config Release
-        sudo cmake --install .
-        cd $GITHUB_WORKSPACE
+        echo "=== Installing Vcpkg ==="
+        git clone https://github.com/microsoft/vcpkg.git ~/vcpkg
+        ~/vcpkg/bootstrap-vcpkg.sh
+
+        VCPKG_ROOT: ~/vcpkg
+        echo "VCPKG_ROOT=$VCPKG_ROOT" >> $GITHUB_ENV
+
+    # ============================================================================
+    # Install packages via vcpkg (Unix)
+    # ============================================================================
+    - name: Install dependencies via vcpkg (Unix)
+      if: startsWith(matrix.config.os, 'ubuntu', 'macos')
+      run: |
+        echo "=== Installing dependencies via vcpkg ==="
+        ~/vcpkg/vcpkg install zlib openssl minizip-ng
 
     # ============================================================================
     # Windows: Use default vcpkg
@@ -192,16 +159,22 @@ jobs:
         Write-Host "CMAKE_PREFIX_PATH: $installedPath"
         
         cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -G "${{ matrix.config.generators }}" `
-          -DNEKO_BUILD_TESTS=ON -DNEKO_AUTO_FETCH_DEPS=ON `
+          -DNEKO_FUNCTION_BUILD_TESTS=ON -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON `
           -DCMAKE_TOOLCHAIN_FILE="$toolchainFile" `
           -DVCPKG_TARGET_TRIPLET=x64-windows `
           -DCMAKE_PREFIX_PATH="$installedPath"
       shell: powershell
 
-    - name: Configure CMake (Unix)
-      if: "!startsWith(matrix.config.os, 'windows')"
+    - name: Configure CMake (Ubuntu)
+      if: "startsWith(matrix.config.os, 'ubuntu')"
       run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_BUILD_TESTS=ON -DNEKO_AUTO_FETCH_DEPS=ON
+        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_FUNCTION_BUILD_TESTS=ON -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_PREFIX_PATH=$VCPKG_ROOT/installed/x64-linux
+      shell: bash
+
+    - name: Configure CMake (macOS)
+      if: "startsWith(matrix.config.os, 'macos')"
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_FUNCTION_BUILD_TESTS=ON -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_PREFIX_PATH=$VCPKG_ROOT/installed/x64-macos
       shell: bash
 
     - name: Verify Hash and Archive Support
