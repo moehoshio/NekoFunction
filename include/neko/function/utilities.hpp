@@ -43,8 +43,7 @@
 
 // Include OpenSSL headers for hash functions
 #if defined(NEKO_IMPORT_OPENSSL)
-#include <openssl/md5.h>
-#include <openssl/sha.h>
+#include <openssl/evp.h>
 
 #else
 #undef NEKO_FUNCTION_ENABLE_HASH // If no supported hash functions are available, undefine the macro
@@ -864,30 +863,39 @@ namespace neko::util {
          */
         inline std::string hash(const std::string str, Algorithm algorithm = Algorithm::sha256) {
             const unsigned char *unsignedData = reinterpret_cast<const unsigned char *>(str.c_str());
-            unsigned char outBuf[128];
-            int condLen = 0;
+            unsigned char outBuf[EVP_MAX_MD_SIZE];
+            unsigned int condLen = 0;
+            
+            const EVP_MD *md = nullptr;
             switch (algorithm) {
                 case Algorithm::sha1:
-                    SHA1(unsignedData, str.size(), outBuf);
-                    condLen = SHA_DIGEST_LENGTH;
+                    md = EVP_sha1();
                     break;
                 case Algorithm::sha256:
-                    SHA256(unsignedData, str.size(), outBuf);
-                    condLen = SHA256_DIGEST_LENGTH;
+                    md = EVP_sha256();
                     break;
                 case Algorithm::sha512:
-                    SHA512(unsignedData, str.size(), outBuf);
-                    condLen = SHA512_DIGEST_LENGTH;
+                    md = EVP_sha512();
                     break;
                 case Algorithm::md5:
-                    MD5(unsignedData, str.size(), outBuf);
-                    condLen = MD5_DIGEST_LENGTH;
+                    md = EVP_md5();
                     break;
                 default:
                     break;
             }
+            
+            if (md != nullptr) {
+                EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+                if (ctx != nullptr) {
+                    EVP_DigestInit_ex(ctx, md, nullptr);
+                    EVP_DigestUpdate(ctx, unsignedData, str.size());
+                    EVP_DigestFinal_ex(ctx, outBuf, &condLen);
+                    EVP_MD_CTX_free(ctx);
+                }
+            }
+            
             std::stringstream ssRes;
-            for (int i = 0; i < condLen; ++i) {
+            for (unsigned int i = 0; i < condLen; ++i) {
                 ssRes << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(outBuf[i]);
             }
             return ssRes.str();

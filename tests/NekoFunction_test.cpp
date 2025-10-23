@@ -391,15 +391,15 @@ int main(int argc, char **argv) {
     std::cout << "=== NekoFunction Test Configuration ===" << std::endl;
     
 #ifdef NEKO_ENABLE_HASH_SUPPORT
-    std::cout << "✓ Hash support: ENABLED" << std::endl;
+    std::cout << "Hash support: ENABLED" << std::endl;
 #else
-    std::cout << "✗ Hash support: DISABLED" << std::endl;
+    std::cout << "Hash support: DISABLED" << std::endl;
 #endif
 
 #ifdef NEKO_FUNCTION_ENABLE_ARCHIVER
-    std::cout << "✓ Archiver support: ENABLED" << std::endl;
+    std::cout << "Archiver support: ENABLED" << std::endl;
 #else
-    std::cout << "✗ Archiver support: DISABLED" << std::endl;
+    std::cout << "Archiver support: DISABLED" << std::endl;
 #endif
     
     std::cout << "========================================" << std::endl << std::endl;
