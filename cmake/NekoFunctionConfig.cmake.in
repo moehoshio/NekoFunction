@@ -14,7 +14,14 @@ if(NEKO_FUNCTION_HAS_HASH)
 endif()
 
 if(NEKO_FUNCTION_HAS_ARCHIVER)
-    find_dependency(minizip-ng REQUIRED)
+    # Try to find minizip-ng (vcpkg/system) first, then MINIZIP (Conan)
+    find_dependency(minizip-ng QUIET)
+    if(NOT minizip-ng_FOUND)
+        find_dependency(MINIZIP QUIET)
+        if(NOT MINIZIP_FOUND)
+            message(FATAL_ERROR "minizip-ng is required but not found. Please install minizip-ng package.")
+        endif()
+    endif()
 endif()
 
 # Include the targets file

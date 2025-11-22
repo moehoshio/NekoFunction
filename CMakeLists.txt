@@ -129,7 +129,14 @@ if(NEKO_FUNCTION_ENABLE_ARCHIVER OR NEKO_FUNCTION_ENABLE_HASH)
     # Archiver support
     if(NEKO_FUNCTION_ENABLE_ARCHIVER)
         target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVER)
-        target_link_libraries(NekoFunction PUBLIC MINIZIP::minizip-ng)
+        # Support both vcpkg (MINIZIP::minizip-ng) and Conan (MINIZIP::minizip) target names
+        if(TARGET MINIZIP::minizip-ng)
+            target_link_libraries(NekoFunction PUBLIC MINIZIP::minizip-ng)
+        elseif(TARGET MINIZIP::minizip)
+            target_link_libraries(NekoFunction PUBLIC MINIZIP::minizip)
+        else()
+            message(FATAL_ERROR "minizip-ng target not found. Expected MINIZIP::minizip-ng or MINIZIP::minizip")
+        endif()
     endif(NEKO_FUNCTION_ENABLE_ARCHIVER)
     
 else()
@@ -196,7 +203,14 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
     # Archiver support
     if(NEKO_FUNCTION_ENABLE_ARCHIVER)
         target_compile_definitions(NekoFunction_module PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVER)
-        target_link_libraries(NekoFunction_module PUBLIC MINIZIP::minizip-ng)
+                # Support both vcpkg (MINIZIP::minizip-ng) and Conan (MINIZIP::minizip) target names
+        if(TARGET MINIZIP::minizip-ng)
+            target_link_libraries(NekoFunction_module PUBLIC MINIZIP::minizip-ng)
+        elseif(TARGET MINIZIP::minizip)
+            target_link_libraries(NekoFunction_module PUBLIC MINIZIP::minizip)
+        else()
+            message(FATAL_ERROR "minizip-ng target not found. Expected MINIZIP::minizip-ng or MINIZIP::minizip")
+        endif()
     endif(NEKO_FUNCTION_ENABLE_ARCHIVER)
     
     # Compiler-specific module flags
