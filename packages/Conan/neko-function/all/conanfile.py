@@ -67,6 +67,8 @@ class NekoFunctionConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
+        if self.options.enable_hash or self.options.enable_archive:
+            cmake.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

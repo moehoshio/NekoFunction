@@ -203,7 +203,7 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
     # Archiver support
     if(NEKO_FUNCTION_ENABLE_ARCHIVER)
         target_compile_definitions(NekoFunction_module PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVER)
-                # Support both vcpkg (MINIZIP::minizip-ng) and Conan (MINIZIP::minizip) target names
+        # Support both vcpkg (MINIZIP::minizip-ng) and Conan (MINIZIP::minizip) target names
         if(TARGET MINIZIP::minizip-ng)
             target_link_libraries(NekoFunction_module PUBLIC MINIZIP::minizip-ng)
         elseif(TARGET MINIZIP::minizip)
