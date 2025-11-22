@@ -58,6 +58,10 @@ class NekoFunctionConan(ConanFile):
         tc.generate()
         
         deps = CMakeDeps(self)
+        # Set the target name mapping for minizip-ng
+        if self.options.enable_archive:
+            deps.set_property("minizip-ng", "cmake_find_mode", "both")
+            deps.set_property("minizip-ng", "cmake_file_name", "minizip-ng")
         deps.generate()
     
     def build(self):
