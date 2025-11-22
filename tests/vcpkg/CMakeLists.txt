@@ -7,6 +7,20 @@ endif()
 
 project(NekoFunctionVcpkgTest VERSION 1.0 LANGUAGES CXX)
 
+# Workaround for macOS vcpkg LibLZMA static library detection issue
+# Disable LibLZMA requirement checks that fail with static libraries on macOS
+if(APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(CMAKE_DISABLE_FIND_PACKAGE_LibLZMA FALSE)
+    # Try to find LibLZMA without strict function checks
+    find_package(LibLZMA QUIET)
+    if(LibLZMA_FOUND)
+        # Override the REQUIRED components check
+        set(LIBLZMA_HAS_AUTO_DECODER TRUE CACHE BOOL "" FORCE)
+        set(LIBLZMA_HAS_EASY_ENCODER TRUE CACHE BOOL "" FORCE)
+        set(LIBLZMA_HAS_LZMA_PRESET TRUE CACHE BOOL "" FORCE)
+    endif()
+endif()
+
 # Find the NekoFunction package
 find_package(NekoFunction REQUIRED CONFIG)
 
