@@ -113,16 +113,21 @@ if(NEKO_FUNCTION_ENABLE_ARCHIVER OR NEKO_FUNCTION_ENABLE_HASH)
         target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
         target_link_libraries(NekoFunction PUBLIC OpenSSL::SSL OpenSSL::Crypto)
         
-        # static link on Windows
-        if (NEKO_FUNCTION_STATIC_LINK AND WIN32)
-            target_link_libraries(NekoFunction PUBLIC
-            Crypt32
-            advapi32
-            ws2_32
-            user32
-            bcrypt
-        )
-        endif(NEKO_FUNCTION_STATIC_LINK AND WIN32)
+        # Link Windows system libraries required by static OpenSSL
+        # This is needed when using vcpkg x64-windows-static or when NEKO_FUNCTION_STATIC_LINK is ON
+        if (WIN32)
+            # Check if OpenSSL is static by examining the library type
+            get_target_property(_openssl_type OpenSSL::Crypto TYPE)
+            if(_openssl_type STREQUAL "STATIC_LIBRARY" OR NEKO_FUNCTION_STATIC_LINK)
+                target_link_libraries(NekoFunction PUBLIC
+                    ws2_32
+                    Crypt32
+                    advapi32
+                    user32
+                    bcrypt
+                )
+            endif()
+        endif()
         
     endif(NEKO_FUNCTION_ENABLE_HASH)
 
@@ -187,16 +192,21 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
         target_compile_definitions(NekoFunction_module PUBLIC NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
         target_link_libraries(NekoFunction_module PUBLIC OpenSSL::SSL OpenSSL::Crypto)
         
-        # static link on Windows
-        if (NEKO_FUNCTION_STATIC_LINK AND WIN32)
-            target_link_libraries(NekoFunction_module PUBLIC
-            Crypt32
-            advapi32
-            ws2_32
-            user32
-            bcrypt
-        )
-        endif(NEKO_FUNCTION_STATIC_LINK AND WIN32)
+        # Link Windows system libraries required by static OpenSSL
+        # This is needed when using vcpkg x64-windows-static or when NEKO_FUNCTION_STATIC_LINK is ON
+        if (WIN32)
+            # Check if OpenSSL is static by examining the library type
+            get_target_property(_openssl_type OpenSSL::Crypto TYPE)
+            if(_openssl_type STREQUAL "STATIC_LIBRARY" OR NEKO_FUNCTION_STATIC_LINK)
+                target_link_libraries(NekoFunction_module PUBLIC
+                    ws2_32
+                    Crypt32
+                    advapi32
+                    user32
+                    bcrypt
+                )
+            endif()
+        endif()
         
     endif(NEKO_FUNCTION_ENABLE_HASH)
 

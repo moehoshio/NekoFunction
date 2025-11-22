@@ -15,20 +15,22 @@ endif()
 
 if(NEKO_FUNCTION_HAS_ARCHIVER)
     # Try to find minizip-ng (vcpkg/system) first, then MINIZIP (Conan)
-    # Suppress errors from minizip-ng's transitive dependencies (like LibLZMA on macOS)
+    # Use find_package instead of find_dependency to avoid REQUIRED propagation
     set(_neko_cmake_find_quietly ${CMAKE_FIND_QUIETLY})
     set(CMAKE_FIND_QUIETLY TRUE)
     
     find_package(minizip-ng QUIET CONFIG)
     
+    if(NOT minizip-ng_FOUND)
+        # Try Conan's MINIZIP package name
+        find_package(MINIZIP QUIET CONFIG)
+    endif()
+    
     set(CMAKE_FIND_QUIETLY ${_neko_cmake_find_quietly})
     unset(_neko_cmake_find_quietly)
     
-    if(NOT minizip-ng_FOUND)
-        find_dependency(MINIZIP QUIET)
-        if(NOT MINIZIP_FOUND)
-            message(WARNING "minizip-ng is required but not found. Archiver features may not work properly.")
-        endif()
+    if(NOT minizip-ng_FOUND AND NOT MINIZIP_FOUND)
+        message(WARNING "minizip-ng/MINIZIP is required for archiver support but was not found. Archiver features may not work properly.")
     endif()
 endif()
 
