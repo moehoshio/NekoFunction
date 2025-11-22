@@ -131,11 +131,11 @@ jobs:
 
     - name: Install neko-function via vcpkg (Unix)
       if: runner.os != 'Windows'
-      run: ${{ github.workspace }}/vcpkg/vcpkg install neko-function:${{ matrix.triplet }}[archive,hash]
+      run: ${{ github.workspace }}/vcpkg/vcpkg install neko-function[core,archive,hash]:${{ matrix.triplet }}
 
     - name: Install neko-function via vcpkg (Windows)
       if: runner.os == 'Windows'
-      run: .\vcpkg\vcpkg.exe install neko-function:${{ matrix.triplet }}[archive,hash]
+      run: .\vcpkg\vcpkg.exe install neko-function[core,archive,hash]:${{ matrix.triplet }}
     - name: Verify installation structure (Unix)
       if: runner.os != 'Windows'
       run: |
