@@ -2,10 +2,10 @@
 neko-function/[*]
 
 [options]
-neko-function:enable_archiver=True
-neko-function:enable_hash=True
-neko-function:enable_module=False
-neko-function:static_link=False
+neko-function/*:enable_archiver=True
+neko-function/*:enable_hash=True
+neko-function/*:enable_module=False
+neko-function/*:static_link=False
 
 [generators]
 CMakeToolchain
