@@ -1,0 +1,6 @@
+[requires]
+neko-function/[*]
+
+[generators]
+CMakeToolchain
+CMakeDeps
