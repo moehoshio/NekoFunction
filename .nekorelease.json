@@ -1,0 +1,13 @@
+{
+  "packageName": "neko-function",
+  "repositoryUrl": "https://github.com/moehoshio/NekoFunction",
+  "packageManagers": [
+    "vcpkg",
+    "Conan"
+  ],
+  "mode": "Update",
+  "outputPaths": {
+    "vcpkg": "./packages/vcpkg",
+    "Conan": "./packages/Conan"
+  }
+}
