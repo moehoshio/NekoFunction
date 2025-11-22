@@ -7,8 +7,9 @@ endif()
 
 project(NekoFunctionVcpkgTest VERSION 1.0 LANGUAGES CXX)
 
-# Workaround for macOS vcpkg LibLZMA static library detection issue
-# Disable LibLZMA requirement checks that fail with static libraries on macOS
+# Workaround for vcpkg minizip-ng dependency issues
+# On macOS: LibLZMA static library detection fails
+# On all platforms: Need to find minizip-ng before NekoFunction to ensure targets exist
 if(APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_DISABLE_FIND_PACKAGE_LibLZMA FALSE)
     # Try to find LibLZMA without strict function checks
@@ -20,6 +21,10 @@ if(APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         set(LIBLZMA_HAS_LZMA_PRESET TRUE CACHE BOOL "" FORCE)
     endif()
 endif()
+
+# Pre-find minizip-ng before NekoFunction to ensure the target is available
+# This is needed because NekoFunctionTargets.cmake references MINIZIP::minizip-ng
+find_package(minizip-ng QUIET CONFIG)
 
 # Find the NekoFunction package
 find_package(NekoFunction REQUIRED CONFIG)
