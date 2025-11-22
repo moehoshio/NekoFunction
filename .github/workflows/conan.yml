@@ -82,12 +82,12 @@ jobs:
     - name: Create Conan package from local source (Unix)
       if: runner.os != 'Windows'
       run: |
-        conan create . --build=missing
+        conan create . --build=missing -o enable_archive=True -o enable_hash=True
 
     - name: Create Conan package from local source (Windows)
       if: runner.os == 'Windows'
       run: |
-        conan create . --build=missing
+        conan create . --build=missing -o enable_archive=True -o enable_hash=True
 
     - name: Verify Conan package installation
       run: |
