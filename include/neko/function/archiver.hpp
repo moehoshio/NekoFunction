@@ -8,14 +8,16 @@
 
 #pragma once
 
-#ifdef NEKO_FUNCTION_ENABLE_ARCHIVER
+#if defined(NEKO_FUNCTION_ENABLE_ARCHIVER)
 
+#if !defined(NEKO_FUNCTION_ENABLE_MODULE) || (NEKO_FUNCTION_ENABLE_MODULE == false)
 #include <neko/function/detectFileType.hpp>
 #include <neko/schema/exception.hpp>
 
 #include <memory>
 #include <string>
 #include <vector>
+#endif
 
 namespace neko::archive {
 

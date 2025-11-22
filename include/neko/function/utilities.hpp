@@ -21,6 +21,8 @@
  */
 #pragma once
 
+#if !defined(NEKO_FUNCTION_ENABLE_MODULE) || (NEKO_FUNCTION_ENABLE_MODULE == false)
+
 // C++ Standard Library
 #include <algorithm>
 #include <array>
@@ -51,6 +53,7 @@
 
 #endif // NEKO_FUNCTION_ENABLE_HASH
 
+#endif // NEKO_FUNCTION_ENABLE_MODULE
 /**
  * @namespace neko::ops
  * @brief Operator overloads for functional programming style operations.

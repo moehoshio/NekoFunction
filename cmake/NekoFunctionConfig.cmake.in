@@ -1,0 +1,18 @@
+@PACKAGE_INIT@
+
+# Find required dependencies
+include(CMakeFindDependencyMacro)
+find_dependency(NekoSchema REQUIRED)
+
+# Include the targets file
+include("${CMAKE_CURRENT_LIST_DIR}/NekoFunctionTargets.cmake")
+
+# Recreate alias for consumers
+if(TARGET NekoFunction AND NOT TARGET Neko::Function)
+	add_library(Neko::Function ALIAS NekoFunction)
+endif()
+if(TARGET NekoFunction_module AND NOT TARGET Neko::Function::Module)
+	add_library(Neko::Function::Module ALIAS NekoFunction_module)
+endif()
+
+check_required_components(NekoFunction)
