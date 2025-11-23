@@ -1,6 +1,8 @@
 #pragma once
 
+// Include header for non-module usage
 #if !defined(NEKO_FUNCTION_ENABLE_MODULE) || (NEKO_FUNCTION_ENABLE_MODULE == false)
+
 #include <neko/function/utilities.hpp>
 #include <neko/schema/exception.hpp>
 #include <neko/schema/types.hpp>
@@ -14,6 +16,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 #endif
 
 /**

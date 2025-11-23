@@ -11,7 +11,7 @@ option(NEKO_FUNCTION_AUTO_FETCH_DEPS "Neko Function Automatically fetch dependen
 
 option(NEKO_FUNCTION_STATIC_LINK "Neko Function Static Link library" OFF)
 
-option(NEKO_FUNCTION_ENABLE_ARCHIVER "Neko Function Enable archiver support (requires minizip-ng)" ON)
+option(NEKO_FUNCTION_ENABLE_ARCHIVE "Neko Function Enable archive support (requires minizip-ng)" ON)
 option(NEKO_FUNCTION_ENABLE_HASH "Neko Function Enable hash support (requires OpenSSL)" ON)
 option(NEKO_FUNCTION_ENABLE_MODULE "Neko Function Enable C++20 Module" OFF)
 
@@ -33,9 +33,9 @@ if (NOT ${OpenSSL_FOUND} AND NEKO_FUNCTION_ENABLE_HASH)
     set(NEKO_FUNCTION_ENABLE_HASH OFF)
 endif()
 
-if (NOT ${minizip-ng_FOUND} AND NEKO_FUNCTION_ENABLE_ARCHIVER)
-    message(WARNING "minizip-ng not found. Archiver support will be disabled.")
-    set(NEKO_FUNCTION_ENABLE_ARCHIVER OFF)
+if (NOT ${minizip-ng_FOUND} AND NEKO_FUNCTION_ENABLE_ARCHIVE)
+    message(WARNING "minizip-ng not found. Archive support will be disabled.")
+    set(NEKO_FUNCTION_ENABLE_ARCHIVE OFF)
 endif()
 
 # Create a compatibility alias (in some package managers, the minizip-ng link name is minizip instead of minizip-ng)
@@ -55,13 +55,14 @@ message(STATUS "  - Neko Function Static Link: ${NEKO_FUNCTION_STATIC_LINK}")
 message(STATUS "")
 message(STATUS "  - Neko Function Auto fetch deps: ${NEKO_FUNCTION_AUTO_FETCH_DEPS}")
 message(STATUS "  - Neko Function Build tests: ${NEKO_FUNCTION_BUILD_TESTS}")
+message(STATUS "  - Neko Function Enable Module: ${NEKO_FUNCTION_ENABLE_MODULE}")
 message(STATUS "")
 message(STATUS "Neko Function Dependency summary:")
 message(STATUS "  - NekoSchema Found: ${NekoSchema_FOUND} version: ${NekoSchema_VERSION}")
 message(STATUS "  - OpenSSL support: ${OpenSSL_FOUND} version: ${OpenSSL_VERSION}")
 message(STATUS "  - minizip-ng support: ${minizip-ng_FOUND} version: ${minizip-ng_VERSION}")
 message(STATUS "  - GTest : ${GTest_FOUND} version : ${GTest_VERSION}")
-message(STATUS "  - Archiver support enabled: ${NEKO_FUNCTION_ENABLE_ARCHIVER} via minizip-ng")
+message(STATUS "  - Archive support enabled: ${NEKO_FUNCTION_ENABLE_ARCHIVE} via minizip-ng")
 message(STATUS "  - Hash support enabled: ${NEKO_FUNCTION_ENABLE_HASH} via OpenSSL")
 message(STATUS "")
 
@@ -101,7 +102,7 @@ endif()
 # = Main target =
 # ================
 
-if(NEKO_FUNCTION_ENABLE_ARCHIVER OR NEKO_FUNCTION_ENABLE_HASH)
+if(NEKO_FUNCTION_ENABLE_ARCHIVE OR NEKO_FUNCTION_ENABLE_HASH)
 
     # Create STATIC library with optional features
     add_library(NekoFunction STATIC src/neko/function/archiverZip.cpp)
@@ -148,11 +149,11 @@ if(NEKO_FUNCTION_ENABLE_ARCHIVER OR NEKO_FUNCTION_ENABLE_HASH)
         
     endif(NEKO_FUNCTION_ENABLE_HASH)
 
-    # Archiver support
-    if(NEKO_FUNCTION_ENABLE_ARCHIVER)
-        target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVER)
+    # Archive support
+    if(NEKO_FUNCTION_ENABLE_ARCHIVE)
+        target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVE)
         target_link_libraries(NekoFunction PUBLIC MINIZIP::minizip-ng)
-    endif(NEKO_FUNCTION_ENABLE_ARCHIVER)
+    endif(NEKO_FUNCTION_ENABLE_ARCHIVE)
     
 else()
 
@@ -206,21 +207,21 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
         # This is needed when using vcpkg x64-windows-static or when NEKO_FUNCTION_STATIC_LINK is ON
         if (WIN32)
             # Check if OpenSSL is static by examining the library type or file extension
-            get_target_property(_openssl_type OpenSSL::Crypto TYPE)
-            get_target_property(_openssl_location OpenSSL::Crypto LOCATION)
+            get_target_property(_openssl_type_module OpenSSL::Crypto TYPE)
+            get_target_property(_openssl_location_module OpenSSL::Crypto LOCATION)
             
             # Check if it's a static library by type or file extension
-            set(_is_static_openssl FALSE)
-            if(_openssl_type STREQUAL "STATIC_LIBRARY")
-                set(_is_static_openssl TRUE)
-            elseif(_openssl_location AND _openssl_location MATCHES "\\.(a|lib)$")
+            set(_is_static_openssl_module FALSE)
+            if(_openssl_type_module STREQUAL "STATIC_LIBRARY")
+                set(_is_static_openssl_module TRUE)
+            elseif(_openssl_location_module AND _openssl_location_module MATCHES "\\.(a|lib)$")
                 # Also check if the location ends with .a or .lib (static library extensions)
-                set(_is_static_openssl TRUE)
+                set(_is_static_openssl_module TRUE)
             endif()
             
-            if(_is_static_openssl OR NEKO_FUNCTION_STATIC_LINK)
-                message(STATUS "Linking Windows system libraries for static OpenSSL")
-                target_link_libraries(NekoFunction PUBLIC
+            if(_is_static_openssl_module OR NEKO_FUNCTION_STATIC_LINK)
+                message(STATUS "Linking Windows system libraries for static OpenSSL (module)")
+                target_link_libraries(NekoFunction_module PUBLIC
                     ws2_32
                     Crypt32
                     advapi32
@@ -232,11 +233,11 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
         
     endif(NEKO_FUNCTION_ENABLE_HASH)
 
-    # Archiver support
-    if(NEKO_FUNCTION_ENABLE_ARCHIVER)
-        target_compile_definitions(NekoFunction_module PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVER)
+    # Archive support
+    if(NEKO_FUNCTION_ENABLE_ARCHIVE)
+        target_compile_definitions(NekoFunction_module PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVE)
         target_link_libraries(NekoFunction_module PUBLIC MINIZIP::minizip-ng)
-    endif(NEKO_FUNCTION_ENABLE_ARCHIVER)
+    endif(NEKO_FUNCTION_ENABLE_ARCHIVE)
     
     # Compiler-specific module flags
     if(MSVC)
@@ -270,6 +271,19 @@ if(NEKO_FUNCTION_BUILD_TESTS)
         message(FATAL_ERROR "Please enable -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON or install GTest and make it discoverable by CMake. use -DNEKO_FUNCTION_LIBRARY_PATH=</path/to/gtest>")
     endif()
     
+    # Ensure consistent runtime library usage on Windows
+    if(MSVC)
+        # When using static linking (vcpkg x64-windows-static), use static runtime
+        # Otherwise use dynamic runtime (default)
+        if(NEKO_FUNCTION_STATIC_LINK OR VCPKG_TARGET_TRIPLET MATCHES ".*-static$")
+            set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+            message(STATUS "Using static MSVC runtime library (/MT)")
+        else()
+            set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+            message(STATUS "Using dynamic MSVC runtime library (/MD)")
+        endif()
+    endif()
+    
 
     add_executable(NekoFunction_test tests/function_test.cpp)
     target_include_directories(NekoFunction_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -285,6 +299,17 @@ if(NEKO_FUNCTION_BUILD_TESTS)
         add_executable(NekoFunction_module_tests tests/function_module_test.cpp)
         target_link_libraries(NekoFunction_module_tests PRIVATE Neko::Schema::Module Neko::Function::Module GTest::gtest GTest::gtest_main)
         target_compile_features(NekoFunction_module_tests PRIVATE cxx_std_20)
+        
+        # Link Windows system libraries for static OpenSSL (module tests)
+        if(WIN32 AND NEKO_FUNCTION_ENABLE_HASH)
+            get_target_property(_openssl_type_test OpenSSL::Crypto TYPE)
+            message(STATUS "OpenSSL type for module tests: ${_openssl_type_test}")
+            
+            # Always link system libraries on Windows when using OpenSSL
+            # This is safe even for dynamic OpenSSL and fixes issues with static builds
+            target_link_libraries(NekoFunction_module_tests PRIVATE ws2_32 Crypt32 advapi32 user32 bcrypt)
+        endif()
+        
         gtest_discover_tests(NekoFunction_module_tests)
     endif(NEKO_FUNCTION_ENABLE_MODULE)
 

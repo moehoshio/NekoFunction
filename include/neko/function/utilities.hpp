@@ -1,6 +1,6 @@
 /**
  * @file utilities.hpp
- * @brief Utilities for execution, path handling, string manipulation, and hash computation.
+ * @brief Utilities for time handling, base64 encoding/decoding, path handling, and string manipulation.
  * @author moehoshio
  * @copyright Copyright (c) 2025 Hoshi
  * @license MIT OR Apache-2.0
@@ -8,19 +8,15 @@
  *
  * This header provides a collection of utilities:
  * - Functional programming operators
- * - Hash computation (MD5, SHA1, SHA256, SHA512)
  * - Path manipulation and normalization
- * - UUID generation and manipulation
  * - Base64 encoding/decoding
  * - String utilities
  * - Random value generators
  * - File extension matching
- *
- * @dependencies
- * - OpenSSL (optional): For hash computations
  */
 #pragma once
 
+// Include header for non-module usage
 #if !defined(NEKO_FUNCTION_ENABLE_MODULE) || (NEKO_FUNCTION_ENABLE_MODULE == false)
 
 // C++ Standard Library
@@ -39,19 +35,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-
-#if defined(NEKO_FUNCTION_ENABLE_HASH)
-
-// Include OpenSSL headers for hash functions
-#if defined(NEKO_IMPORT_OPENSSL)
-#include <openssl/evp.h>
-
-#else
-#undef NEKO_FUNCTION_ENABLE_HASH // If no supported hash functions are available, undefine the macro
-#endif
-
-#endif // NEKO_FUNCTION_ENABLE_HASH
 
 #endif // NEKO_FUNCTION_ENABLE_MODULE
 /**
@@ -799,237 +782,5 @@ namespace neko::util {
             return std::nullopt;
         }
     } // namespace check
-
-#if defined(NEKO_FUNCTION_ENABLE_HASH)
-
-    /**
-     * @namespace neko::util::hash
-     * @brief Hash computation utilities.
-     */
-    namespace hash {
-        /**
-         * @enum Algorithm
-         * @brief Supported hash algorithms.
-         */
-        enum class Algorithm {
-            none,   ///< No algorithm
-            md5,    ///< MD5 algorithm
-            sha1,   ///< SHA-1 algorithm
-            sha256, ///< SHA-256 algorithm
-            sha512  ///< SHA-512 algorithm
-        };
-
-        /**
-         * @brief Mapping between hash algorithms and their string representations.
-         */
-        inline std::unordered_map<Algorithm, std::string> hashAlgorithmMap = {
-            {Algorithm::md5, "md5"},
-            {Algorithm::sha1, "sha1"},
-            {Algorithm::sha256, "sha256"},
-            {Algorithm::sha512, "sha512"}};
-
-        /**
-         * @brief Maps a string to a hash algorithm.
-         * @param str String representation of a hash algorithm
-         * @return Corresponding hash algorithm enum value
-         */
-        inline auto mapAlgorithm(const std::string &str) {
-            for (auto it : hashAlgorithmMap) {
-                if (it.second == str) {
-                    return it.first;
-                }
-            }
-            return Algorithm::none;
-        }
-
-        /**
-         * @brief Maps a hash algorithm to its string representation.
-         * @param algorithm Hash algorithm enum value
-         * @return String representation of the hash algorithm
-         */
-        inline auto mapAlgorithm(Algorithm algorithm) {
-            for (auto it : hashAlgorithmMap) {
-                if (it.first == algorithm) {
-                    return it.second;
-                }
-            }
-            return std::string("unknown");
-        }
-
-#if defined(NEKO_IMPORT_OPENSSL)
-
-        /**
-         * @brief Computes the hash of a string.
-         * @param str String to hash
-         * @param algorithm Hash algorithm to use
-         * @return Hexadecimal string representation of the hash
-         */
-        inline std::string hash(const std::string str, Algorithm algorithm = Algorithm::sha256) {
-            const unsigned char *unsignedData = reinterpret_cast<const unsigned char *>(str.c_str());
-            unsigned char outBuf[EVP_MAX_MD_SIZE];
-            unsigned int condLen = 0;
-            
-            const EVP_MD *md = nullptr;
-            switch (algorithm) {
-                case Algorithm::sha1:
-                    md = EVP_sha1();
-                    break;
-                case Algorithm::sha256:
-                    md = EVP_sha256();
-                    break;
-                case Algorithm::sha512:
-                    md = EVP_sha512();
-                    break;
-                case Algorithm::md5:
-                    md = EVP_md5();
-                    break;
-                default:
-                    break;
-            }
-            
-            if (md != nullptr) {
-                EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-                if (ctx != nullptr) {
-                    EVP_DigestInit_ex(ctx, md, nullptr);
-                    EVP_DigestUpdate(ctx, unsignedData, str.size());
-                    EVP_DigestFinal_ex(ctx, outBuf, &condLen);
-                    EVP_MD_CTX_free(ctx);
-                }
-            }
-            
-            std::stringstream ssRes;
-            for (unsigned int i = 0; i < condLen; ++i) {
-                ssRes << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(outBuf[i]);
-            }
-            return ssRes.str();
-        }
-
-        /**
-         * @brief Computes the hash of a file.
-         * @param name Path to the file
-         * @param algorithm Hash algorithm to use
-         * @return Hexadecimal string representation of the hash
-         */
-        inline std::string hashFile(const std::string &name, Algorithm algorithm = Algorithm::sha256) {
-            std::ifstream file(name, std::ios::binary);
-            std::string raw((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-            return hash(raw, algorithm);
-        }
-#endif // NEKO_IMPORT_OPENSSL
-
-    } // namespace hash
-
-#endif // NEKO_FUNCTION_ENABLE_HASH
-
-    /**
-     * @namespace neko::util::uuid
-     * @brief UUID generation and manipulation utilities.
-     */
-    namespace uuid {
-#if defined(NEKO_FUNCTION_ENABLE_HASH)
-
-#if defined(NEKO_IMPORT_OPENSSL)
-        /**
-         * @brief Converts a UUID string to bytes.
-         * @param uuid UUID string in standard format
-         * @return Array of 16 bytes representing the UUID
-         */
-        inline std::array<uint8_t, 16> uuidStringToBytes(const std::string &uuid) {
-            std::array<uint8_t, 16> bytes{};
-            int idx = 0;
-            for (size_t i = 0; i < uuid.length() && idx < 16; ++i) {
-                if (uuid[i] == '-')
-                    continue;
-                uint8_t value = 0;
-                if (uuid[i] >= '0' && uuid[i] <= '9')
-                    value = uuid[i] - '0';
-                else if (uuid[i] >= 'a' && uuid[i] <= 'f')
-                    value = uuid[i] - 'a' + 10;
-                else if (uuid[i] >= 'A' && uuid[i] <= 'F')
-                    value = uuid[i] - 'A' + 10;
-                else
-                    continue;
-                value <<= 4;
-                ++i;
-                if (i < uuid.length() && uuid[i] != '-') {
-                    if (uuid[i] >= '0' && uuid[i] <= '9')
-                        value |= uuid[i] - '0';
-                    else if (uuid[i] >= 'a' && uuid[i] <= 'f')
-                        value |= uuid[i] - 'a' + 10;
-                    else if (uuid[i] >= 'A' && uuid[i] <= 'F')
-                        value |= uuid[i] - 'A' + 10;
-                } else {
-                    --i;
-                }
-                bytes[idx++] = value;
-            }
-            return bytes;
-        }
-
-        /**
-         * @brief Generates a version 3 UUID based on a namespace UUID and a name.
-         * @param namespaceUUID Namespace UUID in string format
-         * @param name Name to use for UUID generation
-         * @return Version 3 UUID string
-         * Example Namespace UUID: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
-         *
-         * @note This requires using hash values, so OpenSSL support is needed
-         */
-        inline std::string uuidV3(const std::string &name, const std::string &namespaceUUID = "6ba7b810-9dad-11d1-80b4-00c04fd430c8") {
-            auto ns_bytes = uuidStringToBytes(namespaceUUID);
-
-            std::string to_hash(reinterpret_cast<const char *>(ns_bytes.data()), ns_bytes.size());
-            to_hash += name;
-
-            std::string md5hex = hash::hash(to_hash, hash::Algorithm::md5);
-
-            std::array<uint8_t, 16> hash_bytes{};
-            for (int i = 0; i < 16; ++i) {
-                hash_bytes[i] = static_cast<uint8_t>(std::stoi(md5hex.substr(i * 2, 2), nullptr, 16));
-            }
-
-            hash_bytes[6] = (hash_bytes[6] & 0x0F) | 0x30; // version 3
-            hash_bytes[8] = (hash_bytes[8] & 0x3F) | 0x80; // RFC4122 variant
-
-            std::ostringstream oss;
-            oss << std::hex << std::setfill('0');
-            for (int i = 0; i < 16; ++i) {
-                oss << std::setw(2) << static_cast<int>(hash_bytes[i]);
-                if (i == 3 || i == 5 || i == 7 || i == 9)
-                    oss << '-';
-            }
-            return oss.str();
-        }
-#endif // NEKO_IMPORT_OPENSSL
-
-#endif // NEKO_FUNCTION_ENABLE_HASH
-
-        /**
-         * @brief Generates a version 4 (random) UUID.
-         * @return UUID string in standard format
-         */
-        inline std::string uuidV4() {
-            static thread_local std::mt19937 gen{std::random_device{}()};
-            static thread_local std::uniform_int_distribution<uint32_t> dis(0, 0xffffffff);
-
-            uint32_t data[4];
-            for (auto &d : data)
-                d = dis(gen);
-
-            // Set the version (4) and variant (10xx)
-            data[1] = (data[1] & 0xFFFF0FFF) | 0x00004000;
-            data[2] = (data[2] & 0x3FFFFFFF) | 0x80000000;
-
-            char buf[37];
-            std::snprintf(
-                buf, sizeof(buf),
-                "%08x-%04x-%04x-%04x-%04x%08x",
-                data[0],
-                (data[1] >> 16) & 0xFFFF, data[1] & 0xFFFF,
-                (data[2] >> 16) & 0xFFFF, data[2] & 0xFFFF,
-                data[3]);
-            return std::string(buf);
-        }
-    } // namespace uuid
 
 } // namespace neko::util

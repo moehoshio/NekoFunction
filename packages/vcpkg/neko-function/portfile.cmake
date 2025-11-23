@@ -10,7 +10,7 @@ set(VCPKG_BUILD_TYPE release)
 
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
-        archive  NEKO_FUNCTION_ENABLE_ARCHIVER
+        archive  NEKO_FUNCTION_ENABLE_ARCHIVE
         hash     NEKO_FUNCTION_ENABLE_HASH
 )
 

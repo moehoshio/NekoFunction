@@ -5,9 +5,14 @@
  */
 
 #include <neko/function/utilities.hpp>
+#include <neko/function/uuid.hpp>
 #include <neko/function/pattern.hpp>
 #include <iostream>
 #include <cassert>
+
+#ifdef NEKO_FUNCTION_ENABLE_HASH
+#include <neko/function/hash.hpp>
+#endif
 
 int main() {
     std::cout << "=== NekoFunction vcpkg Integration Test ===" << std::endl;
@@ -88,7 +93,7 @@ int main() {
     // Test 9: Hash functions (if enabled)
     {
         using namespace neko::util::hash;
-        auto md5Hash = hash("test", Algorithm::md5);
+        auto md5Hash = digest("test", Algorithm::md5);
         assert(md5Hash.length() == 32);
         std::cout << "✓ Hash functions work (enabled)" << std::endl;
     }

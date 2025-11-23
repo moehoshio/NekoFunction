@@ -257,29 +257,29 @@ protected:
 
 TEST_F(HashModuleTest, MD5Hash) {
     using namespace neko::util::hash;
-    auto md5Hash = hash("test", Algorithm::md5);
+    auto md5Hash = digest("test", Algorithm::md5);
     EXPECT_FALSE(md5Hash.empty());
     EXPECT_EQ(md5Hash.length(), 32);
 }
 
 TEST_F(HashModuleTest, SHA256Hash) {
     using namespace neko::util::hash;
-    auto sha256Hash = hash("test", Algorithm::sha256);
+    auto sha256Hash = digest("test", Algorithm::sha256);
     EXPECT_FALSE(sha256Hash.empty());
     EXPECT_EQ(sha256Hash.length(), 64);
 }
 
 TEST_F(HashModuleTest, HashConsistency) {
     using namespace neko::util::hash;
-    auto hash1 = hash("test", Algorithm::md5);
-    auto hash2 = hash("test", Algorithm::md5);
+    auto hash1 = digest("test", Algorithm::md5);
+    auto hash2 = digest("test", Algorithm::md5);
     EXPECT_EQ(hash1, hash2);
 }
 
 TEST_F(HashModuleTest, DifferentInputs) {
     using namespace neko::util::hash;
-    auto hash1 = hash("test1", Algorithm::md5);
-    auto hash2 = hash("test2", Algorithm::md5);
+    auto hash1 = digest("test1", Algorithm::md5);
+    auto hash2 = digest("test2", Algorithm::md5);
     EXPECT_NE(hash1, hash2);
 }
 

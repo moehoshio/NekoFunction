@@ -8,9 +8,13 @@
 
 #pragma once
 
-#if defined(NEKO_FUNCTION_ENABLE_ARCHIVER)
-
+// Include header for non-module usage
 #if !defined(NEKO_FUNCTION_ENABLE_MODULE) || (NEKO_FUNCTION_ENABLE_MODULE == false)
+
+#if !defined(NEKO_FUNCTION_ENABLE_ARCHIVE)
+#error "archiver.hpp requires enable archive support. Please install minizip-ng and set NEKO_FUNCTION_ENABLE_ARCHIVE = ON in CMake."
+#endif
+
 #include <neko/function/detectFileType.hpp>
 #include <neko/schema/exception.hpp>
 
@@ -39,11 +43,11 @@ namespace neko::archive {
      *
      * This structure holds the configuration options for creating an archive,
      * including output path, password, input and exclusion rules, compression, and encryption.
-    */
+     */
     struct CreateConfig {
         std::string
             outputArchivePath, // Path to the output archive file
-            password; // Password for encryption (optional)
+            password;          // Password for encryption (optional)
 
         /**
          * @brief List of input paths to include in the archive.
@@ -81,7 +85,7 @@ namespace neko::archive {
             inputArchivePath, // Extract data from this archive file
             destDir,          // Extract the archive to this directory
             password;         // Password for extraction (optional)
-            
+
         /**
          * @brief List of paths to include in the extraction (if empty, extract all).
          * Supports various matching rules:
@@ -101,7 +105,7 @@ namespace neko::archive {
          *   - Example: "^logs/.*\\.log$" matches all ".log" files under the "logs/" folder.
          */
         std::vector<std::string> includePaths;
-        
+
         /**
          * @brief List of paths to exclude from the extraction.
          * @var excludePaths
@@ -154,5 +158,3 @@ namespace neko::archive {
     } // namespace zip
 
 } // namespace neko::archive
-
-#endif // NEKO_FUNCTION_ENABLE_ARCHIVER

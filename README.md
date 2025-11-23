@@ -16,7 +16,9 @@ NekoFunction integrates multiple functional modules including utilities, archive
 
 ## Core Modules
 
-- 🎯 **Utilities** - Operators, string processing, memory management, time handling, cryptography
+- 🎯 **Utilities** - Operators, string processing, memory management, time handling, Base64, random, validation
+- 🔒 **Hash** - Cryptographic hash functions (MD5, SHA1, SHA256, SHA512) - requires OpenSSL
+- 🆔 **UUID** - UUID generation (v4 always available, v3 requires hash support)
 - 📦 **Archive Management** - ZIP archive creation and extraction with encryption support
 - 🔍 **File Type Detection** - Automatic file type detection based on magic numbers and extensions
 - 🎯 **Pattern Matching** - Advanced pattern matching for file paths with wildcard and regex support
@@ -32,10 +34,19 @@ NekoFunction integrates multiple functional modules including utilities, archive
 - 🧮 **Logic and Math** - Boolean operations, sum, product calculations
 - ⏰ **Time handling** - ISO 8601 parsing, UTC/local time conversion
 - 🔢 **Base64 encoding/decoding** - Standard Base64 encoding and decoding
-- 🎲 **Random utilities** - Random strings, numbers, hexadecimal values, UUID generation
+- 🎲 **Random utilities** - Random strings, numbers, hexadecimal values
 - ✅ **Validation utilities** - URL validation, proxy address validation, resolution matching
-- 🔒 **Hash calculation** - MD5, SHA1, SHA256, SHA512 support (requires OpenSSL)
-- 🆔 **UUID generation** - Support for UUID v3 and v4
+
+### Hash Module (Requires OpenSSL)
+
+- 🔒 **Cryptographic Hash Functions** - MD5, SHA1, SHA256, SHA512
+- 📄 **String and File Hashing** - Compute hash for strings and files
+- 🔧 **Algorithm Mapping** - Convert between algorithm names and enum values
+
+### UUID Module
+
+- 🆔 **UUID v4** - Random UUID generation (always available, no dependencies)
+- 🔐 **UUID v3** - Name-based UUID generation (requires hash support/OpenSSL)
 
 ### Archive Management Module
 
@@ -456,15 +467,16 @@ if (res) {
 ## Hash Calculation (Requires OpenSSL)
 
 ```cpp
+#include <neko/function/hash.hpp>
 
 using namespace neko::util::hash;
 
-// String hash
-auto md5_hash = hash("hello", Algorithm::md5);
-auto sha256_hash = hash("hello", Algorithm::sha256);
+// Compute string hash digest
+auto md5_digest = digest("hello", Algorithm::md5);
+auto sha256_digest = digest("hello", Algorithm::sha256);
 
-// File hash
-auto file_hash = hashFile("document.txt", Algorithm::sha1);
+// Compute file hash digest
+auto file_digest = digestFile("document.txt", Algorithm::sha1);
 
 // Algorithm mapping
 auto algo = mapAlgorithm("sha256"); // Algorithm::sha256
@@ -474,13 +486,15 @@ auto name = mapAlgorithm(Algorithm::md5); // "md5"
 ## UUID
 
 ```cpp
+#include <neko/function/uuid.hpp>
+
 using namespace neko::util::uuid;
 
-// UUID v4 (fully random)
+// UUID v4 (fully random, always available)
 auto uuid4 = uuidV4(); // "550e8400-e29b-41d4-a716-446655440000"
 
-#if defined(NEKO_ENABLE_HASH_SUPPORT)
-// UUID v3 (requires hash support, name-based)
+#if defined(NEKO_IMPORT_OPENSSL)
+// UUID v3 (requires hash support/OpenSSL, name-based)
 auto uuid3 = uuidV3("example.com"); // Based on default namespace
 auto uuid3_custom = uuidV3("example.com", "custom-namespace-uuid");
 #endif
@@ -713,8 +727,8 @@ int main() {
     std::cout << "Token: " << random_token << std::endl;
     
     // Hash calculation (if OpenSSL is available)
-    #ifdef NEKO_ENABLE_HASH_SUPPORT
-    auto hash_value = hash::hash("sensitive_data", hash::Algorithm::sha256);
+    #ifdef NEKO_IMPORT_OPENSSL
+    auto hash_value = hash::digest("sensitive_data", hash::Algorithm::sha256);
     std::cout << "SHA256: " << hash_value << std::endl;
     #endif
     

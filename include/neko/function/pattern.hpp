@@ -1,11 +1,14 @@
 #pragma once
 
+// Include header for non-module usage
 #if !defined(NEKO_FUNCTION_ENABLE_MODULE) || (NEKO_FUNCTION_ENABLE_MODULE == false)
+
 #include <filesystem>
 #include <iostream>
 #include <regex>
 #include <string>
 #include <vector>
+
 #endif
 
 /**

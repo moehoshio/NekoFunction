@@ -50,9 +50,9 @@ import std.compat
 #endif // NEKO_FUNCTION_ENABLE_HASH
 
 // =====================
-// = Archiver Support =
+// = Archive Support =
 // =====================
-#if defined(NEKO_FUNCTION_ENABLE_ARCHIVER)
+#if defined(NEKO_FUNCTION_ENABLE_ARCHIVE)
 #include <minizip-ng/mz.h>
 #include <minizip-ng/mz_strm.h>
 #include <minizip-ng/mz_zip.h>
@@ -70,6 +70,17 @@ export {
     #include "pattern.hpp"
     #include "utilities.hpp"
     #include "detectFileType.hpp"
+    
+    // Hash support
+    #if defined(NEKO_FUNCTION_ENABLE_HASH)
+    #include "hash.hpp"
+    #endif
+
+    #include "uuid.hpp"
+
+    // Archiver support
+    #if defined(NEKO_FUNCTION_ENABLE_ARCHIVE)
     #include "archiver.hpp"
     #include "../../../src/neko/function/archiverZip.cpp"
+    #endif
 }
