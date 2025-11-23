@@ -10,7 +10,7 @@ set(VCPKG_BUILD_TYPE release)
 
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
-        archive  NEKO_FUNCTION_ENABLE_ARCHIVE
+        archive  NEKO_FUNCTION_ENABLE_ARCHIVER
         hash     NEKO_FUNCTION_ENABLE_HASH
 )
 
@@ -25,7 +25,11 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 vcpkg_cmake_config_fixup(CONFIG_PATH lib/cmake/NekoFunction PACKAGE_NAME nekofunction)
-file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/lib")
+
+# Only remove lib directory if both archive and hash features are disabled (header-only mode)
+if(NOT "archive" IN_LIST FEATURES AND NOT "hash" IN_LIST FEATURES)
+    file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/lib")
+endif()
 
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
 

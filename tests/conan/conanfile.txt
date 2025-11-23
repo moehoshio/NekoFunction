@@ -1,6 +1,11 @@
 [requires]
 neko-function/[*]
 
+[options]
+neko-function/*:enable_archive=True
+neko-function/*:enable_hash=True
+neko-function/*:enable_module=False
+
 [generators]
 CMakeToolchain
 CMakeDeps

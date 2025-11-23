@@ -58,11 +58,17 @@ class NekoFunctionConan(ConanFile):
         tc.generate()
         
         deps = CMakeDeps(self)
+        # Set the target name mapping for minizip-ng
+        if self.options.enable_archive:
+            deps.set_property("minizip-ng", "cmake_find_mode", "both")
+            deps.set_property("minizip-ng", "cmake_file_name", "minizip-ng")
         deps.generate()
     
     def build(self):
         cmake = CMake(self)
         cmake.configure()
+        if self.options.enable_hash or self.options.enable_archive:
+            cmake.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -83,7 +89,11 @@ class NekoFunctionConan(ConanFile):
         # Configure based on package type
         if self.options.enable_hash or self.options.enable_archive:
             # Library target with compiled code
-            self.cpp_info.components["NekoFunction"].libs = ["NekoFunction"]
+            # Note: Library will be installed via cmake.install() in package()
+            import os
+            lib_folder = os.path.join(self.package_folder, "lib")
+            if os.path.exists(lib_folder):
+                self.cpp_info.components["NekoFunction"].libs = ["NekoFunction"]
             
             # Add dependencies
             if self.options.enable_hash:
@@ -95,7 +105,7 @@ class NekoFunctionConan(ConanFile):
                 self.cpp_info.components["NekoFunction"].requires.append("minizip-ng::minizip-ng")
                 self.cpp_info.components["NekoFunction"].defines.append("NEKO_FUNCTION_ENABLE_ARCHIVER")
         else:
-            # Header-only target
+            # Header-only target - no libraries
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
         

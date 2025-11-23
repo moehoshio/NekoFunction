@@ -26,15 +26,11 @@ jobs:
             triplet: x64-windows
           - os: windows-latest
             triplet: x64-windows-static
-          - os: windows-latest
-            triplet: x86-windows
           
           # macOS targets
-          - os: macos-latest
-            triplet: x64-osx
           - os: macos-15-intel
             triplet: x64-osx
-          - os: macos-latest
+          - os: macos-latest  # Apple Silicon (ARM64)
             triplet: arm64-osx
 
     steps:
@@ -129,13 +125,23 @@ jobs:
         Write-Host "`nModified portfile content:"
         Get-Content $portfile | Select-Object -First 10
 
-    - name: Install neko-function via vcpkg (Unix)
+    - name: Install dependencies via vcpkg (Unix)
       if: runner.os != 'Windows'
-      run: ${{ github.workspace }}/vcpkg/vcpkg install neko-function:${{ matrix.triplet }}[archive,hash]
+      run: |
+        # Install dependencies first
+        ${{ github.workspace }}/vcpkg/vcpkg install minizip-ng:${{ matrix.triplet }} openssl:${{ matrix.triplet }}
+        
+        # Then install neko-function
+        ${{ github.workspace }}/vcpkg/vcpkg install neko-function[core,archive,hash]:${{ matrix.triplet }}
 
-    - name: Install neko-function via vcpkg (Windows)
+    - name: Install dependencies via vcpkg (Windows)
       if: runner.os == 'Windows'
-      run: .\vcpkg\vcpkg.exe install neko-function:${{ matrix.triplet }}[archive,hash]
+      run: |
+        # Install dependencies first
+        .\vcpkg\vcpkg.exe install minizip-ng:${{ matrix.triplet }} openssl:${{ matrix.triplet }}
+        
+        # Then install neko-function
+        .\vcpkg\vcpkg.exe install neko-function[core,archive,hash]:${{ matrix.triplet }}
     - name: Verify installation structure (Unix)
       if: runner.os != 'Windows'
       run: |
@@ -199,7 +205,7 @@ jobs:
         # Configure
         cmake -B ./build -S . \
           -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/vcpkg/installed/${{ matrix.triplet }}" \
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} \
           -DCMAKE_BUILD_TYPE=Release
         
         # Build
@@ -277,7 +283,7 @@ jobs:
         # Configure
         cmake -B .\build -S . `
           -DCMAKE_TOOLCHAIN_FILE="$PWD\..\..\vcpkg\scripts\buildsystems\vcpkg.cmake" `
-          -DCMAKE_PREFIX_PATH="$PWD\..\..\vcpkg\installed\${{ matrix.triplet }}"
+          -DVCPKG_TARGET_TRIPLET="${{ matrix.triplet }}"
         
         # Build
         cmake --build .\build --config Release

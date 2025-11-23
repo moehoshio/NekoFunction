@@ -4,6 +4,19 @@
 include(CMakeFindDependencyMacro)
 find_dependency(NekoSchema REQUIRED)
 
+# Find optional dependencies based on enabled features
+# These are set during package configuration
+set(NEKO_FUNCTION_HAS_HASH @NEKO_FUNCTION_ENABLE_HASH@)
+set(NEKO_FUNCTION_HAS_ARCHIVER @NEKO_FUNCTION_ENABLE_ARCHIVER@)
+
+if(NEKO_FUNCTION_HAS_HASH)
+    find_dependency(OpenSSL REQUIRED)
+endif()
+
+if(NEKO_FUNCTION_HAS_ARCHIVER)
+	find_dependency(minizip-ng REQUIRED)
+endif()
+
 # Include the targets file
 include("${CMAKE_CURRENT_LIST_DIR}/NekoFunctionTargets.cmake")
 
