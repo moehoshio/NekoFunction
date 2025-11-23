@@ -1,8 +1,8 @@
 ﻿vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO moehoshio/NekoFunction
-    REF v1.0.2
-    SHA512 c870aafa0272843765b2962da23bd3f81013149bd7337ef7ccff8a514a5a66819620bcc75d194cb4254a35f86b142e306931cd85b4e646ad1b84199cc21299cf
+    REF v1.0.3
+    SHA512 0a186ee5f18f91c323096621c9ef3c220926250ec44c45d6dd8d1db8630913558fde49b9864c0569cd8cac7560c7cfa3e3fe7cf4d51bbee688f1b63a9d10654f
     HEAD_REF main
 )
 
@@ -20,7 +20,8 @@ function(neko_function_is_header_only OUT_IS_HEADER_ONLY)
     endif()
 endfunction()
 
-if(neko_function_is_header_only(IS_HEADER_ONLY) AND IS_HEADER_ONLY)
+neko_function_is_header_only(IS_HEADER_ONLY)
+if(IS_HEADER_ONLY)
     set(VCPKG_BUILD_TYPE release)
 endif()
 
@@ -36,11 +37,11 @@ vcpkg_cmake_configure(
 vcpkg_cmake_install()
 vcpkg_cmake_config_fixup(CONFIG_PATH lib/cmake/NekoFunction PACKAGE_NAME nekofunction)
 
-if(neko_function_is_header_only(IS_HEADER_ONLY) AND IS_HEADER_ONLY)
+neko_function_is_header_only(IS_HEADER_ONLY)
+if(IS_HEADER_ONLY)
     file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/lib")
 endif()
 
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
-
