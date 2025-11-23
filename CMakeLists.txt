@@ -105,7 +105,16 @@ endif()
 if(NEKO_FUNCTION_ENABLE_ARCHIVE OR NEKO_FUNCTION_ENABLE_HASH)
 
     # Create STATIC library with optional features
-    add_library(NekoFunction STATIC src/neko/function/archiveZip.cpp)
+    # Only add archiveZip.cpp if archive support is enabled
+    if(NEKO_FUNCTION_ENABLE_ARCHIVE)
+        add_library(NekoFunction STATIC src/neko/function/archiveZip.cpp)
+    else()
+        # Create empty static library for hash-only builds
+        add_library(NekoFunction STATIC)
+        # Add a dummy source file to satisfy the build system
+        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp" "// Dummy file for hash-only build\n")
+        target_sources(NekoFunction PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp")
+    endif()
     
     target_include_directories(NekoFunction PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
