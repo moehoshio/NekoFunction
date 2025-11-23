@@ -1,6 +1,6 @@
 ﻿{
   "name": "neko-function",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A comprehensive modern C++ utility library that provides practical functions for common programming tasks.",
   "homepage": "https://github.com/moehoshio/NekoFunction",
   "license": "MIT OR Apache-2.0",
@@ -17,7 +17,7 @@
   ],
   "features": {
     "archive": {
-      "description": "Build with archive support",
+      "description": "Enable archive support",
       "dependencies": [
         {
             "name": "minizip-ng",
@@ -26,7 +26,7 @@
       ]
     },
     "hash": {
-      "description": "Build with hash support",
+      "description": "Enable hash support",
       "dependencies": [
         {
           "name": "openssl",

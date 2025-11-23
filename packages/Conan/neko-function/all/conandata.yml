@@ -2,3 +2,7 @@
   "1.0.0":
     url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.0.tar.gz"
     sha256: "e9791b8be64641fbe2850148fa45bf8dd97622e984e9e799fb4b47024eb4c30c"
+
+  "1.0.1":
+    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "76aad1967d8b4fe023870f77794ac180b613be312bb1f1216b37629e0ceed8cd"
