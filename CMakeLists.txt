@@ -105,7 +105,7 @@ endif()
 if(NEKO_FUNCTION_ENABLE_ARCHIVE OR NEKO_FUNCTION_ENABLE_HASH)
 
     # Create STATIC library with optional features
-    add_library(NekoFunction STATIC src/neko/function/archiverZip.cpp)
+    add_library(NekoFunction STATIC src/neko/function/archiveZip.cpp)
     
     target_include_directories(NekoFunction PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

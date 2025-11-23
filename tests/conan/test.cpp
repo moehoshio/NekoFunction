@@ -101,13 +101,13 @@ int main() {
     std::cout << "○ Hash functions not enabled" << std::endl;
 #endif
 
-#ifdef NEKO_FUNCTION_ENABLE_ARCHIVER
-    // Test 10: Archiver detection (if enabled)
+#ifdef NEKO_FUNCTION_ENABLE_ARCHIVE
+    // Test 10: Archive detection (if enabled)
     {
-        std::cout << "✓ Archiver support compiled (enabled)" << std::endl;
+        std::cout << "✓ Archive support compiled (enabled)" << std::endl;
     }
 #else
-    std::cout << "○ Archiver support not enabled" << std::endl;
+    std::cout << "○ Archive support not enabled" << std::endl;
 #endif
     
     std::cout << std::endl;

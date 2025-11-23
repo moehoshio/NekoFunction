@@ -103,7 +103,7 @@ class NekoFunctionConan(ConanFile):
             
             if self.options.enable_archive:
                 self.cpp_info.components["NekoFunction"].requires.append("minizip-ng::minizip-ng")
-                self.cpp_info.components["NekoFunction"].defines.append("NEKO_FUNCTION_ENABLE_ARCHIVER")
+                self.cpp_info.components["NekoFunction"].defines.append("NEKO_FUNCTION_ENABLE_ARCHIVE")
         else:
             # Header-only target - no libraries
             self.cpp_info.bindirs = []

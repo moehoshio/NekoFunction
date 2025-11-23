@@ -78,9 +78,9 @@ export {
 
     #include "uuid.hpp"
 
-    // Archiver support
+    // Archive support
     #if defined(NEKO_FUNCTION_ENABLE_ARCHIVE)
-    #include "archiver.hpp"
-    #include "../../../src/neko/function/archiverZip.cpp"
+    #include "archive.hpp"
+    #include "../../../src/neko/function/archiveZip.cpp"
     #endif
 }

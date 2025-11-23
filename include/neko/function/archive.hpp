@@ -1,5 +1,5 @@
 /**
- * @file archiver.hpp
+ * @file archive.hpp
  * @brief Archive management
  * @author moehoshio
  * @copyright Copyright (c) 2025 Hoshi
@@ -12,7 +12,7 @@
 #if !defined(NEKO_FUNCTION_ENABLE_MODULE) || (NEKO_FUNCTION_ENABLE_MODULE == false)
 
 #if !defined(NEKO_FUNCTION_ENABLE_ARCHIVE)
-#error "archiver.hpp requires enable archive support. Please install minizip-ng and set NEKO_FUNCTION_ENABLE_ARCHIVE = ON in CMake."
+#error "archive.hpp requires enable archive support. Please install minizip-ng and set NEKO_FUNCTION_ENABLE_ARCHIVE = ON in CMake."
 #endif
 
 #include <neko/function/detectFileType.hpp>

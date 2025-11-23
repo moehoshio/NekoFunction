@@ -77,14 +77,14 @@ NekoFunction integrates multiple functional modules including utilities, archive
 
 ### Archive Management (Optional)
 
-To enable Archive support, set the `NEKO_FUNCTION_ENABLE_ARCHIVER` variable to `ON` (default), and install [minizip-ng](https://github.com/nmoinvaz/minizip-ng). Then configure CMake to search for your minizip-ng installation path.
+To enable Archive support, set the `NEKO_FUNCTION_ENABLE_ARCHIVE` variable to `ON` (default), and install [minizip-ng](https://github.com/nmoinvaz/minizip-ng). Then configure CMake to search for your minizip-ng installation path.
 
 Set the `CMAKE_PREFIX_PATH` or `NEKO_FUNCTION_LIBRARY_PATH` variable to your minizip-ng installation directory.
 
 ```shell
-cmake -D NEKO_FUNCTION_ENABLE_ARCHIVER=ON -D CMAKE_PREFIX_PATH=/path/to/your/minizip-ng -B ./build -S .
+cmake -D NEKO_FUNCTION_ENABLE_ARCHIVE=ON -D CMAKE_PREFIX_PATH=/path/to/your/minizip-ng -B ./build -S .
 # or
-cmake -D NEKO_FUNCTION_ENABLE_ARCHIVER=ON -D NEKO_FUNCTION_LIBRARY_PATH=/path/to/your/minizip-ng -B ./build -S .
+cmake -D NEKO_FUNCTION_ENABLE_ARCHIVE=ON -D NEKO_FUNCTION_LIBRARY_PATH=/path/to/your/minizip-ng -B ./build -S .
 ```
 
 If minizip-ng is found, you should see output similar to:

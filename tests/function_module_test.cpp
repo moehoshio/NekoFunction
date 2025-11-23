@@ -289,7 +289,7 @@ TEST_F(HashModuleTest, DifferentInputs) {
 // Archiver Tests (Module, conditional compilation)
 // ============================================================================
 
-#ifdef NEKO_FUNCTION_ENABLE_ARCHIVER
+#ifdef NEKO_FUNCTION_ENABLE_ARCHIVE
 
 class ArchiverModuleTest : public ::testing::Test {
 protected:
@@ -371,7 +371,7 @@ TEST_F(ArchiverModuleTest, ExtractArchive) {
     std::filesystem::remove_all(extractDir);
 }
 
-#endif // NEKO_FUNCTION_ENABLE_ARCHIVER
+#endif // NEKO_FUNCTION_ENABLE_ARCHIVE
 
 // ============================================================================
 // Module-Specific Tests
@@ -419,10 +419,10 @@ int main(int argc, char **argv) {
     std::cout << "Hash support: DISABLED" << std::endl;
 #endif
 
-#ifdef NEKO_FUNCTION_ENABLE_ARCHIVER
-    std::cout << "Archiver support: ENABLED" << std::endl;
+#ifdef NEKO_FUNCTION_ENABLE_ARCHIVE
+    std::cout << "Archive support: ENABLED" << std::endl;
 #else
-    std::cout << "Archiver support: DISABLED" << std::endl;
+    std::cout << "Archive support: DISABLED" << std::endl;
 #endif
     
     std::cout << "================================================" << std::endl << std::endl;
