@@ -38,6 +38,11 @@ if (NOT ${minizip-ng_FOUND} AND NEKO_FUNCTION_ENABLE_ARCHIVER)
     set(NEKO_FUNCTION_ENABLE_ARCHIVER OFF)
 endif()
 
+# Create a compatibility alias (in some package managers, the minizip-ng link name is minizip instead of minizip-ng)
+if (NOT TARGET MINIZIP::minizip-ng AND TARGET MINIZIP::minizip)
+    add_library(MINIZIP::minizip-ng ALIAS MINIZIP::minizip)
+endif()
+
 # Print configuration summary
 message(STATUS "Start configuration Neko Function...")
 message(STATUS "")
@@ -282,6 +287,7 @@ if(NEKO_FUNCTION_BUILD_TESTS)
         target_compile_features(NekoFunction_module_tests PRIVATE cxx_std_20)
         gtest_discover_tests(NekoFunction_module_tests)
     endif(NEKO_FUNCTION_ENABLE_MODULE)
+
 else()
     message(STATUS "NekoFunction tests disabled (NEKO_FUNCTION_BUILD_TESTS=OFF)")
 endif()
