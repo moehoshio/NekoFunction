@@ -1,28 +1,4 @@
 ﻿sources:
-  "1.0.0":
-    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.0.tar.gz"
-    sha256: "e9791b8be64641fbe2850148fa45bf8dd97622e984e9e799fb4b47024eb4c30c"
-
-  "1.0.1":
-    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.1.tar.gz"
-    sha256: "76aad1967d8b4fe023870f77794ac180b613be312bb1f1216b37629e0ceed8cd"
-
-  "1.0.2":
-    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.2.tar.gz"
-    sha256: "f584cc8b88704cafbb7c9e87f52b8f1a5a132fa8d9ffb67b260b4c9e2cb0b1c8"
-
-  "1.0.3":
-    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.3.tar.gz"
-    sha256: "1059c94af988b6fac3fbc55ba9152601fefeb3e17408ff9f87f593599a784c7d"
-
-  "1.0.4":
-    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.4.tar.gz"
-    sha256: "80ebb00abde1d20e21563df1d4768d3cd3d1b85a235182e0e878405e813e8ccb"
-
-  "1.0.5":
-    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.5.tar.gz"
-    sha256: "97aae8e89e391d2b555a8210eec8eba79cf2fa0bb68a034a822f185c580208f6"
-
-  "1.0.6":
-    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.6.tar.gz"
-    sha256: "0fa95e1916a9cba11a92572ff63bf24642fdd0e15a52657919524488a9faf85c"
+  "1.0.7":
+    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.7.tar.gz"
+    sha256: "4665374e10b13eb1610abdbdcd22e4c3b5f25011b39b15868fe15ee47b2732f9"
