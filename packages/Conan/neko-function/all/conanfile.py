@@ -6,7 +6,7 @@ import os
 
 class NekoFunctionConan(ConanFile):
     name = "neko-function"
-    version = "1.0.1"
+    version = "1.0.2"
     license = "MIT OR Apache-2.0"
     author = "moehoshio"
     url = "https://github.com/moehoshio/NekoFunction"
@@ -117,4 +117,5 @@ class NekoFunctionConan(ConanFile):
     
     def package_id(self):
         self.info.clear()
+
 

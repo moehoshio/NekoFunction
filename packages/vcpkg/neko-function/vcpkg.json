@@ -1,6 +1,6 @@
-﻿{
+{
   "name": "neko-function",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A comprehensive modern C++ utility library that provides practical functions for common programming tasks.",
   "homepage": "https://github.com/moehoshio/NekoFunction",
   "license": "MIT OR Apache-2.0",
