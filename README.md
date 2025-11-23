@@ -1,18 +1,21 @@
 # NekoFunction
 
 A comprehensive modern C++ utility library that provides practical functions for common programming tasks.  
-NekoFunction integrates multiple functional modules including utilities, archive management, file type detection, and pattern matching capabilities.
+NekoFunction integrates multiple functional modules including utilities, archive management and file type detection.
 
 [![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
 ![Require](https://img.shields.io/badge/%20Require%20-%3E=%20C++%2020-orange.svg)
 [![CMake](https://img.shields.io/badge/CMake-3.14+-green.svg)](https://cmake.org/)
+![Module Support](https://img.shields.io/badge/Modules-C%2B%2B20-blueviolet.svg)
 
 ## Features
 
-- Easy to use
-- Modern C++20
-- Header-only library
+- Easy-to-use, simple and intuitive API
+- Utilities for common programming tasks (string , time, iso8601, base64 ,random, validation)
+- Hash functions (MD5, SHA1, SHA256, SHA512)
+- Archive management with ZIP support and encryption
 - Cross-platform compatibility
+- Modern C++20 - Module support
 
 ## Core Modules
 
@@ -21,7 +24,6 @@ NekoFunction integrates multiple functional modules including utilities, archive
 - 🆔 **UUID** - UUID generation (v4 always available, v3 requires hash support)
 - 📦 **Archive Management** - ZIP archive creation and extraction with encryption support
 - 🔍 **File Type Detection** - Automatic file type detection based on magic numbers and extensions
-- 🎯 **Pattern Matching** - Advanced pattern matching for file paths with wildcard and regex support
 
 ## Functionalities
 
@@ -62,66 +64,18 @@ NekoFunction integrates multiple functional modules including utilities, archive
 - 🎯 **Dual Validation** - Combine magic number and extension for accurate detection
 - 📋 **Extensive Format Support** - Support for common file formats (images, archives, documents, etc.)
 
-### Pattern Matching Module
-
-- 🎯 **Wildcard Patterns** - Support for `*` wildcard matching
-- 🔍 **Regular Expressions** - Full regex pattern support
-- 📁 **Path Matching** - Absolute, relative, and directory pattern matching
-- 📝 **Extension Patterns** - Specialized file extension matching
-
 ## Requirements
 
 - C++20 or higher compatible compiler
-- CMake 3.14 or higher (if using CMake)
+- CMake 3.14 or higher
 - Git
-
-### Archive Management (Optional)
-
-To enable Archive support, set the `NEKO_FUNCTION_ENABLE_ARCHIVE` variable to `ON` (default), and install [minizip-ng](https://github.com/nmoinvaz/minizip-ng). Then configure CMake to search for your minizip-ng installation path.
-
-Set the `CMAKE_PREFIX_PATH` or `NEKO_FUNCTION_LIBRARY_PATH` variable to your minizip-ng installation directory.
-
-```shell
-cmake -D NEKO_FUNCTION_ENABLE_ARCHIVE=ON -D CMAKE_PREFIX_PATH=/path/to/your/minizip-ng -B ./build -S .
-# or
-cmake -D NEKO_FUNCTION_ENABLE_ARCHIVE=ON -D NEKO_FUNCTION_LIBRARY_PATH=/path/to/your/minizip-ng -B ./build -S .
-```
-
-If minizip-ng is found, you should see output similar to:
-
-```shell
--- Dependency summary:
-    ...
---   - minizip-ng support: TRUE version: 4.0.1
---   - Archiver support enabled: TRUE via minizip-ng
-    ...
-```
-
-### Hash Support (Optional)
-
-To enable Hash support, set the `NEKO_FUNCTION_ENABLE_HASH` variable to `ON` (default), and install [OpenSSL](https://www.openssl.org/). Then configure CMake to search for your OpenSSL installation path.
-
-```shell
-cmake -D NEKO_FUNCTION_ENABLE_HASH=ON -D CMAKE_PREFIX_PATH=/path/to/your/openssl -B ./build -S .
-# or
-cmake -D NEKO_FUNCTION_ENABLE_HASH=ON -D NEKO_FUNCTION_LIBRARY_PATH=/path/to/your/openssl -B ./build -S .
-```
-
-if OpenSSL is found, you should see output similar to:
-
-```shell
--- Dependency summary:
-    ...
---   - OpenSSL support: TRUE version: 3.0.10
---   - Hash support enabled: TRUE via OpenSSL
-    ...
-```
 
 ## Quick Start
 
-Configure: [CMake](#cmake) | [Manual](#manual) | [Static Linking](#static-linking) | [Test](#test)
+Configure: [CMake](#cmake) | [vcpkg](#vcpkg) | [Conan](#conan) | [Static Linking](#static-linking) | [Test](#test)
 
 Usage:
+
 - [Core Utilities](#core-utilities)
   - [Operators](#operators)
     - [Pipe](#pipe-)
@@ -169,74 +123,245 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(NekoFunction)
 
-target_link_libraries(your_target PRIVATE NekoFunction)
+target_link_libraries(your_target PRIVATE Neko::Function)
 ```
 
 2. Include the header files in your code
 
 ```cpp
-// Core utilities
 #include <neko/function/utilities.hpp>
-
-// Archive management
-#include <neko/function/archiver.hpp>
-
-// File type detection
-#include <neko/function/detectFileType.hpp>
-
-// Pattern matching
-#include <neko/function/pattern.hpp>
 ```
 
-### Manual
+#### C++20 Module Support
 
-When installing manually, you need to manually fetch the dependency [`NekoSchema`](https://github.com/moehoshio/NekoSchema).
+NekoFunction supports C++20 modules. To use NekoFunction as a module, ensure your compiler supports C++20 modules and configure your project accordingly.
 
-After installing the dependency, please continue:
+```cmake
+...
+# Add NekoFunction to your CMake project
+FetchContent_Declare(
+    NekoFunction
+    GIT_REPOSITORY https://github.com/moehoshio/NekoFunction.git
+    GIT_TAG        main
+)
+ 
 
-1. Clone or download the repository to your host
+# Set Variables Before Building
+set(NEKO_FUNCTION_ENABLE_MODULE ON CACHE BOOL "Enable Module support")
+FetchContent_MakeAvailable(NekoFunction)
 
-```bash
-git clone https://github.com/moehoshio/NekoFunction.git
+target_link_libraries(your_target PRIVATE Neko::Function::Module)
+```
+
+Import the module in your C++ code:
+
+```cpp
+import neko.function;
+```
+
+#### Archive Management (Optional)
+
+To enable Archive support, set the `NEKO_FUNCTION_ENABLE_ARCHIVE` variable to `ON` (default), and install [minizip-ng](https://github.com/nmoinvaz/minizip-ng). Then configure CMake to search for your minizip-ng installation path.
+
+Set the `CMAKE_PREFIX_PATH` or `NEKO_FUNCTION_LIBRARY_PATH` variable to your minizip-ng installation directory.
+
+```shell
+cmake -D NEKO_FUNCTION_ENABLE_ARCHIVE=ON -D NEKO_FUNCTION_LIBRARY_PATH=/path/to/your/minizip-ng -B ./build -S .
 ```
 
 or
 
+```cmake 
+...
+# Add NekoFunction to your CMake project
+FetchContent_Declare(
+    NekoFunction
+    GIT_REPOSITORY https://github.com/moehoshio/NekoFunction.git
+    GIT_TAG        main
+)
+# Set Variables Before Building
+find_package(minizip-ng REQUIRED)
+set(NEKO_FUNCTION_ENABLE_ARCHIVE ON CACHE BOOL "Enable Archive support")
+FetchContent_MakeAvailable(NekoFunction)
+...
+```
+
+If minizip-ng is found, you should see output similar to:
+
 ```shell
-curl -L -o NekoFunction.zip https://github.com/moehoshio/NekoFunction/archive/refs/heads/main.zip
-
-unzip NekoFunction.zip
+-- Dependency summary:
+    ...
+--   - minizip-ng support: TRUE version: 4.0.1
+--   - Archive support enabled: TRUE via minizip-ng
+    ...
 ```
 
-2. Copy the entire include directory to your include path
+#### Hash Support (Optional)
+
+To enable Hash support, set the `NEKO_FUNCTION_ENABLE_HASH` variable to `ON` (default), and install [OpenSSL](https://www.openssl.org/). Then configure CMake to search for your OpenSSL installation path.
 
 ```shell
-cp -r NekoFunction/include/ /path/to/your/include/
+cmake -D NEKO_FUNCTION_ENABLE_HASH=ON -D NEKO_FUNCTION_LIBRARY_PATH=/path/to/your/openssl -B ./build -S .
 ```
 
-3. Include the header files in your code
+or
 
-```cpp
-// Core utilities
-#include <neko/function/utilities.hpp>
-
-// Archive management
-#include <neko/function/archiver.hpp>
-
-// File type detection
-#include <neko/function/detectFileType.hpp>
-
-// Pattern matching
-#include <neko/function/pattern.hpp>
+```cmake
+...
+# Add NekoFunction to your CMake project
+FetchContent_Declare(
+    NekoFunction
+    GIT_REPOSITORY https://github.com/moehoshio/NekoFunction.git
+    GIT_TAG        main
+)
+# Set Variables Before Building
+find_package(OpenSSL REQUIRED)
+set(NEKO_FUNCTION_ENABLE_HASH ON CACHE BOOL "Enable Hash support")
+FetchContent_MakeAvailable(NekoFunction)
+...
 ```
 
-### Static Linking
+if OpenSSL is found, you should see output similar to:
 
-If you want to use static linking, make sure all libraries (OpenSSL, libcurl..) are built as static libraries. (NekoFunction itself is always a static library)
+```shell
+-- Dependency summary:
+    ...
+--   - OpenSSL support: TRUE version: 3.0.10
+--   - Hash support enabled: TRUE via OpenSSL
+    ...
+```
+
+#### Static Linking
+
+If you want to use static linking, make sure all libraries (OpenSSL, minizip-ng..) are built as static libraries. (NekoFunction itself is always a static library)
 Enable the static linking option in your CMake configuration:
 
 ```bash
 cmake -B ./build . -DNEKO_FUNCTION_STATIC_LINK=ON -DNEKO_FUNCTION_LIBRARY_PATH="/path/to/x64-windows-static" -S .
+```
+
+### Vcpkg
+
+To install NekoFunction using vcpkg, run the following command:
+
+```bash
+vcpkg install neko-function
+```
+
+Or add it to your `vcpkg.json`:
+
+```json
+{
+  "dependencies": ["neko-function"]
+}
+```
+
+Then in your CMakeLists.txt:
+
+```cmake
+find_package(NekoFunction CONFIG REQUIRED)
+target_link_libraries(your_target PRIVATE Neko::Function)
+```
+
+When configuring your project, specify the vcpkg toolchain file:
+
+```shell
+cmake -B build -DCMAKE_PREFIX_PATH=/path/to/vcpkg/installed/x64-windows
+cmake --build build --config Debug
+```
+
+Archive support via features:
+
+```bash
+vcpkg install neko-function[archive]
+```
+
+Hash support via features:
+
+```bash
+vcpkg install neko-function[hash]
+```
+
+Note: Installing via vcpkg does not support modules.
+
+### Conan
+
+To install NekoFunction using Conan, add the following to your `conanfile.txt`:
+
+```ini
+[requires]
+neko-function/[*]
+
+[generators]
+CMakeDeps
+CMakeToolchain
+```
+
+Or use it in your `conanfile.py`:
+
+```python
+from conan import ConanFile
+
+class YourProject(ConanFile):
+    requires = "neko-function/[*]"
+    generators = "CMakeDeps", "CMakeToolchain"
+```
+
+Then install and use:
+
+```shell
+conan install . --build=missing
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake
+cmake --build build
+```
+
+In your CMakeLists.txt:
+
+```cmake
+find_package(NekoFunction CONFIG REQUIRED)
+target_link_libraries(your_target PRIVATE Neko::Function)
+```
+
+#### Conan with C++20 Module Support
+
+To enable C++20 module support with Conan, use the `enable_module` option:
+
+```shell
+conan install . --build=missing -o neko-function/[*]:enable_module=True
+```
+
+Or specify it in your `conanfile.txt`:
+
+```ini
+[requires]
+neko-function/[*]
+
+[options]
+neko-function/*:enable_module=True
+
+[generators]
+CMakeDeps
+CMakeToolchain
+```
+
+Or in your `conanfile.py`:
+
+```python
+from conan import ConanFile
+
+class YourProject(ConanFile):
+    requires = "neko-function/[*]"
+    generators = "CMakeDeps", "CMakeToolchain"
+    
+    def configure(self):
+        self.options["neko-function"].enable_module = True
+```
+
+Then link against the module target in your CMakeLists.txt:
+
+```cmake
+find_package(NekoFunction CONFIG REQUIRED)
+target_link_libraries(your_target PRIVATE Neko::Function::Module)
 ```
 
 ## Core Utilities
@@ -507,7 +632,7 @@ The archive management module provides comprehensive support for creating and ex
 ### ZIP Archive Operations
 
 ```cpp
-#include <neko/function/archiver.hpp>
+#include <neko/function/archive.hpp>
 
 using namespace neko::archive;
 
@@ -688,7 +813,7 @@ bool shouldInclude = matchPatterns("/home/user/project/src/main.cpp", includePat
 
 ```cpp
 #include <neko/function/utilities.hpp>
-#include <neko/function/archiver.hpp>
+#include <neko/function/archive.hpp>
 #include <neko/function/detectFileType.hpp>
 #include <neko/function/pattern.hpp>
 #include <iostream>
@@ -768,13 +893,10 @@ You can run the tests to verify that everything is working correctly.
 If you haven't configured the build yet, please run:
 
 ```shell
-# Global options
-cmake -D NEKO_BUILD_TESTS=ON -D NEKO_AUTO_FETCH_DEPS=ON -D CMAKE_PREFIX_PATH=<path_to_openssl_and_minizip_ng> -B ./build -S .
-# or specify to Neko Function only
 cmake -D NEKO_FUNCTION_BUILD_TESTS=ON -D NEKO_FUNCTION_AUTO_FETCH_DEPS=ON -D NEKO_FUNCTION_LIBRARY_PATH=<path_to_openssl_and_minizip_ng> -B ./build -S .
 ```
 
-Now, you can build the test files (you must build them manually at least once before running the tests!).
+Now, you can build the test files with the following command:
 
 ```shell
 cmake --build ./build --config Debug
@@ -807,14 +929,6 @@ If you want to disable building and running tests, you can set the following CMa
 ```shell
 cmake -B ./build -DNEKO_FUNCTION_BUILD_TESTS=OFF -S .
 ```
-
-or
-
-```shell
-cmake -B ./build -DNEKO_BUILD_TESTS=OFF -S .
-```
-
-(Note: This will disable tests for all Neko modules!)
 
 This will skip test targets during the build process.
 
