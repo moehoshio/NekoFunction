@@ -1,8 +1,8 @@
 ﻿vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO moehoshio/NekoFunction
-    REF v1.0.3
-    SHA512 0a186ee5f18f91c323096621c9ef3c220926250ec44c45d6dd8d1db8630913558fde49b9864c0569cd8cac7560c7cfa3e3fe7cf4d51bbee688f1b63a9d10654f
+    REF v1.0.4
+    SHA512 cb52da687bcf72d9f7078e1311dc348b05d8142a283a73c8f537b62461aa4104c7717ea10d8b3fbca259f8daabb8385e7f0cec1457605203613e84515aab3712
     HEAD_REF main
 )
 
@@ -45,3 +45,4 @@ endif()
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
+
