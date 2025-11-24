@@ -690,6 +690,14 @@ zip::extract(extractConfig);
 bool isZip = zip::isZipFile("backup.zip");
 ```
 
+or Module:
+
+```cpp
+import neko.function.archive;
+using namespace neko::archive;
+// Similar usage as above
+```
+
 ### Configuration Options
 
 - **Compression Levels**: `none`, `fast`, `normal`, `maximum`, `ultra`

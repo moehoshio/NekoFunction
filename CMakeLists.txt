@@ -213,6 +213,7 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
         PUBLIC
             FILE_SET CXX_MODULES FILES
                 ${CMAKE_CURRENT_SOURCE_DIR}/include/neko/function/neko.function.cppm
+                ${CMAKE_CURRENT_SOURCE_DIR}/include/neko/function/neko.function.archive.cppm
     )
     
     target_compile_features(NekoFunction_module PUBLIC cxx_std_20)

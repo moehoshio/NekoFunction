@@ -15,11 +15,13 @@
 #error "hash.hpp requires enable hash support. Please install openSSL and set NEKO_FUNCTION_ENABLE_HASH = ON in CMake."
 #endif
 
-#include <unordered_map>
-#include <string>
+#include <neko/schema/exception.hpp>
+
 #include <fstream>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 
 #endif // NEKO_FUNCTION_ENABLE_MODULE
 
@@ -77,8 +79,6 @@ namespace neko::util::hash {
         return std::string("unknown");
     }
 
-#if defined(NEKO_IMPORT_OPENSSL)
-
     /**
      * @brief Computes the hash of a string.
      * @param str String to hash
@@ -86,6 +86,8 @@ namespace neko::util::hash {
      * @return Hexadecimal string representation of the hash
      */
     inline std::string digest(const std::string str, Algorithm algorithm = Algorithm::sha256) {
+        // Hash computation using OpenSSL
+#if defined(NEKO_IMPORT_OPENSSL)
         const unsigned char *unsignedData = reinterpret_cast<const unsigned char *>(str.c_str());
         unsigned char outBuf[EVP_MAX_MD_SIZE];
         unsigned int condLen = 0;
@@ -123,6 +125,10 @@ namespace neko::util::hash {
             ssRes << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(outBuf[i]);
         }
         return ssRes.str();
+#else
+        #warning "Hash functions are not supported. Please enable OpenSSL support."
+        throw ex::Runtime("Hash functions are not supported. Please enable OpenSSL support.");
+#endif // NEKO_IMPORT_OPENSSL
     }
 
     /**
@@ -136,6 +142,5 @@ namespace neko::util::hash {
         std::string raw((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
         return digest(raw, algorithm);
     }
-#endif // NEKO_IMPORT_OPENSSL
 
 } // namespace neko::util::hash
