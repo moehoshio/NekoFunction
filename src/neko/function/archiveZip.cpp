@@ -13,7 +13,6 @@
 #include <filesystem>
 #endif
 
-
 namespace neko::archive::zip {
 
     // RAII for minizip-ng zip reader

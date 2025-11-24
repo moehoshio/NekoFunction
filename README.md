@@ -94,8 +94,8 @@ Usage:
   - [Base64](#base64-encodingdecoding)
   - [Random](#random-utilities)
   - [Validation](#validation-utilities)
-  - [Hash](#hash-calculation-requires-openssl)
-  - [UUID](#uuid)
+- [Hash](#hash-calculation-requires-openssl)
+- [UUID](#uuid)
 - [Archive Management](#archive-management)
   - [ZIP Archive Operations](#zip-archive-operations)
   - [Configuration Options](#configuration-options)
@@ -147,7 +147,7 @@ FetchContent_Declare(
  
 
 # Set Variables Before Building
-set(NEKO_FUNCTION_ENABLE_MODULE ON CACHE BOOL "Enable Module support")
+set(NEKO_FUNCTION_ENABLE_MODULE ON CACHE BOOL "Enable Module support" FORCE)
 FetchContent_MakeAvailable(NekoFunction)
 
 target_link_libraries(your_target PRIVATE Neko::Function::Module)
@@ -181,7 +181,7 @@ FetchContent_Declare(
 )
 # Set Variables Before Building
 find_package(minizip-ng REQUIRED)
-set(NEKO_FUNCTION_ENABLE_ARCHIVE ON CACHE BOOL "Enable Archive support")
+set(NEKO_FUNCTION_ENABLE_ARCHIVE ON CACHE BOOL "Enable Archive support" FORCE)
 FetchContent_MakeAvailable(NekoFunction)
 ...
 ```
@@ -216,7 +216,7 @@ FetchContent_Declare(
 )
 # Set Variables Before Building
 find_package(OpenSSL REQUIRED)
-set(NEKO_FUNCTION_ENABLE_HASH ON CACHE BOOL "Enable Hash support")
+set(NEKO_FUNCTION_ENABLE_HASH ON CACHE BOOL "Enable Hash support" FORCE)
 FetchContent_MakeAvailable(NekoFunction)
 ...
 ```
@@ -280,6 +280,12 @@ Hash support via features:
 
 ```bash
 vcpkg install neko-function[hash]
+```
+
+All Enabled:
+
+```bash
+vcpkg install neko-function[archive,hash,core]
 ```
 
 Note: Installing via vcpkg does not support modules.
@@ -367,6 +373,10 @@ target_link_libraries(your_target PRIVATE Neko::Function::Module)
 ## Core Utilities
 
 The utilities module provides the foundation of NekoFunction, including functional programming operators, string manipulation, memory management, and various utility functions.
+
+```cpp
+#include <neko/function/utilities.hpp>
+```
 
 ## Operators
 
@@ -928,6 +938,15 @@ If you want to disable building and running tests, you can set the following CMa
 
 ```shell
 cmake -B ./build -DNEKO_FUNCTION_BUILD_TESTS=OFF -S .
+```
+
+or
+
+```cmake
+...
+# Set Variables Before Building
+set(NEKO_FUNCTION_BUILD_TESTS OFF CACHE BOOL "Disable building tests" FORCE)
+FetchContent_MakeAvailable(NekoFunction)
 ```
 
 This will skip test targets during the build process.

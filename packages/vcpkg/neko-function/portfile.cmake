@@ -12,16 +12,13 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         hash     NEKO_FUNCTION_ENABLE_HASH
 )
 
-function(neko_function_is_header_only OUT_IS_HEADER_ONLY)
-    if(NOT "archive" IN_LIST FEATURES AND NOT "hash" IN_LIST FEATURES)
-        set(${OUT_IS_HEADER_ONLY} TRUE PARENT_SCOPE)
-    else()
-        set(${OUT_IS_HEADER_ONLY} FALSE PARENT_SCOPE)
-    endif()
-endfunction()
+if("archive" IN_LIST FEATURES)
+    set(NEKO_FUNCTION_IS_HEADER_ONLY FALSE)
+else()
+    set(NEKO_FUNCTION_IS_HEADER_ONLY TRUE)
+endif()
 
-neko_function_is_header_only(IS_HEADER_ONLY)
-if(IS_HEADER_ONLY)
+if(NEKO_FUNCTION_IS_HEADER_ONLY)
     set(VCPKG_BUILD_TYPE release)
 endif()
 
@@ -39,8 +36,7 @@ vcpkg_cmake_config_fixup(CONFIG_PATH lib/cmake/NekoFunction PACKAGE_NAME nekofun
 
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 
-neko_function_is_header_only(IS_HEADER_ONLY)
-if(IS_HEADER_ONLY)
+if(NEKO_FUNCTION_IS_HEADER_ONLY)
     file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/lib")
 endif()
 

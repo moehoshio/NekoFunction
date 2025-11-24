@@ -102,49 +102,37 @@ endif()
 # = Main target =
 # ================
 
-if(NEKO_FUNCTION_ENABLE_ARCHIVE OR NEKO_FUNCTION_ENABLE_HASH)
+if(NEKO_FUNCTION_ENABLE_ARCHIVE)
 
-    # Create STATIC library with optional features
-    # Only add archiveZip.cpp if archive support is enabled
-    if(NEKO_FUNCTION_ENABLE_ARCHIVE)
-        add_library(NekoFunction STATIC src/neko/function/archiveZip.cpp)
-    else()
-        # Create empty static library for hash-only builds
-        add_library(NekoFunction STATIC)
-        # Add a dummy source file to satisfy the build system
-        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp" "// Dummy file for hash-only build\n")
-        target_sources(NekoFunction PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp")
-    endif()
+    # Create STATIC library with archive support
+    add_library(NekoFunction STATIC src/neko/function/archiveZip.cpp)
     
     target_include_directories(NekoFunction PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     )
     target_compile_features(NekoFunction PUBLIC cxx_std_20)
-    target_link_libraries(NekoFunction PUBLIC NekoSchema)
+    target_link_libraries(NekoFunction PUBLIC NekoSchema MINIZIP::minizip-ng)
+    target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVE)
 
     # Hash support
     if (NEKO_FUNCTION_ENABLE_HASH)
         target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
         target_link_libraries(NekoFunction PUBLIC OpenSSL::SSL OpenSSL::Crypto)
         
-        # Link Windows system libraries required by static OpenSSL
-        # This is needed when using vcpkg x64-windows-static or when NEKO_FUNCTION_STATIC_LINK is ON
         if (WIN32)
-            # Check if OpenSSL is static by examining the library type or file extension
-            get_target_property(_openssl_type OpenSSL::Crypto TYPE)
-            get_target_property(_openssl_location OpenSSL::Crypto LOCATION)
+            get_target_property(_openssl_type_module OpenSSL::Crypto TYPE)
+            get_target_property(_openssl_location_module OpenSSL::Crypto LOCATION)
             
-            # Check if it's a static library by type or file extension
-            set(_is_static_openssl FALSE)
-            if(_openssl_type STREQUAL "STATIC_LIBRARY")
-                set(_is_static_openssl TRUE)
-            elseif(_openssl_location AND _openssl_location MATCHES "\\.(a|lib)$")
+            set(_is_static_openssl_module FALSE)
+            if(_openssl_type_module STREQUAL "STATIC_LIBRARY")
+                set(_is_static_openssl_module TRUE)
+            elseif(_openssl_location_module AND _openssl_location_module MATCHES "\\.(a|lib)$")
                 # Also check if the location ends with .a or .lib (static library extensions)
-                set(_is_static_openssl TRUE)
+                set(_is_static_openssl_module TRUE)
             endif()
             
-            if(_is_static_openssl OR NEKO_FUNCTION_STATIC_LINK)
+            if(_is_static_openssl_module OR NEKO_FUNCTION_STATIC_LINK)
                 message(STATUS "Linking Windows system libraries for static OpenSSL")
                 target_link_libraries(NekoFunction PUBLIC
                     ws2_32
@@ -157,16 +145,10 @@ if(NEKO_FUNCTION_ENABLE_ARCHIVE OR NEKO_FUNCTION_ENABLE_HASH)
         endif()
         
     endif(NEKO_FUNCTION_ENABLE_HASH)
-
-    # Archive support
-    if(NEKO_FUNCTION_ENABLE_ARCHIVE)
-        target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_ARCHIVE)
-        target_link_libraries(NekoFunction PUBLIC MINIZIP::minizip-ng)
-    endif(NEKO_FUNCTION_ENABLE_ARCHIVE)
     
 else()
 
-    # No optional features enabled, create INTERFACE library
+    # No translation unit create INTERFACE library
     add_library(NekoFunction INTERFACE)
     
     target_include_directories(NekoFunction INTERFACE
@@ -175,6 +157,37 @@ else()
     )
     target_link_libraries(NekoFunction INTERFACE NekoSchema)
     target_compile_features(NekoFunction INTERFACE cxx_std_20)
+
+    # Hash support
+    if (NEKO_FUNCTION_ENABLE_HASH)
+        target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
+        target_link_libraries(NekoFunction PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+        
+        if (WIN32)
+            get_target_property(_openssl_type_module OpenSSL::Crypto TYPE)
+            get_target_property(_openssl_location_module OpenSSL::Crypto LOCATION)
+            
+            set(_is_static_openssl_module FALSE)
+            if(_openssl_type_module STREQUAL "STATIC_LIBRARY")
+                set(_is_static_openssl_module TRUE)
+            elseif(_openssl_location_module AND _openssl_location_module MATCHES "\\.(a|lib)$")
+                # Also check if the location ends with .a or .lib (static library extensions)
+                set(_is_static_openssl_module TRUE)
+            endif()
+            
+            if(_is_static_openssl_module OR NEKO_FUNCTION_STATIC_LINK)
+                message(STATUS "Linking Windows system libraries for static OpenSSL")
+                target_link_libraries(NekoFunction PUBLIC
+                    ws2_32
+                    Crypt32
+                    advapi32
+                    user32
+                    bcrypt
+                )
+            endif()
+        endif()
+        
+    endif(NEKO_FUNCTION_ENABLE_HASH)
 
 endif()
 
@@ -212,14 +225,10 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
         target_compile_definitions(NekoFunction_module PUBLIC NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
         target_link_libraries(NekoFunction_module PUBLIC OpenSSL::SSL OpenSSL::Crypto)
         
-        # Link Windows system libraries required by static OpenSSL
-        # This is needed when using vcpkg x64-windows-static or when NEKO_FUNCTION_STATIC_LINK is ON
         if (WIN32)
-            # Check if OpenSSL is static by examining the library type or file extension
             get_target_property(_openssl_type_module OpenSSL::Crypto TYPE)
             get_target_property(_openssl_location_module OpenSSL::Crypto LOCATION)
             
-            # Check if it's a static library by type or file extension
             set(_is_static_openssl_module FALSE)
             if(_openssl_type_module STREQUAL "STATIC_LIBRARY")
                 set(_is_static_openssl_module TRUE)
@@ -282,8 +291,6 @@ if(NEKO_FUNCTION_BUILD_TESTS)
     
     # Ensure consistent runtime library usage on Windows
     if(MSVC)
-        # When using static linking (vcpkg x64-windows-static), use static runtime
-        # Otherwise use dynamic runtime (default)
         if(NEKO_FUNCTION_STATIC_LINK OR VCPKG_TARGET_TRIPLET MATCHES ".*-static$")
             set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
             message(STATUS "Using static MSVC runtime library (/MT)")
@@ -308,14 +315,7 @@ if(NEKO_FUNCTION_BUILD_TESTS)
         add_executable(NekoFunction_module_tests tests/function_module_test.cpp)
         target_link_libraries(NekoFunction_module_tests PRIVATE Neko::Schema::Module Neko::Function::Module GTest::gtest GTest::gtest_main)
         target_compile_features(NekoFunction_module_tests PRIVATE cxx_std_20)
-        
-        # Link Windows system libraries for static OpenSSL (module tests)
         if(WIN32 AND NEKO_FUNCTION_ENABLE_HASH)
-            get_target_property(_openssl_type_test OpenSSL::Crypto TYPE)
-            message(STATUS "OpenSSL type for module tests: ${_openssl_type_test}")
-            
-            # Always link system libraries on Windows when using OpenSSL
-            # This is safe even for dynamic OpenSSL and fixes issues with static builds
             target_link_libraries(NekoFunction_module_tests PRIVATE ws2_32 Crypt32 advapi32 user32 bcrypt)
         endif()
         
