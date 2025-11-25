@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(NekoFunction VERSION 1.0.9 LANGUAGES CXX)
+project(NekoFunction VERSION 1.0.10 LANGUAGES CXX)
 
 # ================
 # === Config ====
@@ -209,11 +209,21 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
     add_library(NekoFunction_module)
     add_library(Neko::Function::Module ALIAS NekoFunction_module)
     
+    set(NEKO_FUNCTION_MODULE_FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/neko/function/neko.function.cppm
+    )
+    
+    # Add archive module if enabled
+    if(NEKO_FUNCTION_ENABLE_ARCHIVE)
+        list(APPEND NEKO_FUNCTION_MODULE_FILES
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/neko/function/neko.function.archive.cppm
+        )
+    endif()
+    
     target_sources(NekoFunction_module
         PUBLIC
-            FILE_SET CXX_MODULES FILES                
-                ${CMAKE_CURRENT_SOURCE_DIR}/include/neko/function/neko.function.cppm
-                ${CMAKE_CURRENT_SOURCE_DIR}/include/neko/function/neko.function.archive.cppm
+            FILE_SET CXX_MODULES FILES
+                ${NEKO_FUNCTION_MODULE_FILES}
     )
     
     target_compile_features(NekoFunction_module PUBLIC cxx_std_20)
