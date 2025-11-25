@@ -13,7 +13,9 @@
 #include <gtest/gtest.h>
 
 import neko.function;
+#ifdef NEKO_FUNCTION_ENABLE_ARCHIVE
 import neko.function.archive;
+#endif
 
 // ============================================================================
 // String Utilities Tests (Module)
