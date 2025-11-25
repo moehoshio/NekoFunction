@@ -1,20 +1,12 @@
-/**
- * @file neko.function.cppm
- * @brief C++20 module interface for NekoFunction
- * @details This module exports base NekoFunction functionality by wrapping the header files.
- *          The original headers are still available for traditional include-based usage.
- */
+// =====================
+// === Global Module ===
+// =====================
 
 module;
 
 // ====================
 // = Standard Library =
 // ====================
-
-#if defined(__cpp_lib_modules) && (__cpp_lib_modules >= 202207L)
-import std;
-import std.compat;
-#else
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -30,9 +22,6 @@ import std.compat;
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <iostream>
-#include <cstring>
-#endif
 
 // ====================
 // === Hash Support ===
@@ -49,9 +38,13 @@ import std.compat;
 
 #endif // NEKO_FUNCTION_ENABLE_HASH
 
-import neko.schema;
+// =====================
+// = Module Interface ==
+// =====================
 
 export module neko.function;
+
+import neko.schema;
 
 // Control header files to not import dependencies (dependencies are declared and imported by the cppm)
 #define NEKO_FUNCTION_ENABLE_MODULE true

@@ -16,36 +16,22 @@ jobs:
         config:
           # Windows builds
           - {
-              name: "Windows MSVC Debug",
+              name: "Windows MSVC Module Debug",
               os: windows-latest,
               cc: "cl",
               cxx: "cl",
               build_type: "Debug",
-              generators: "Visual Studio 17 2022"
+              generators: "Visual Studio 17 2022",
+              enable_module: "ON"
             }
           - {
-              name: "Windows MSVC Release",
+              name: "Windows MSVC Module Release",
               os: windows-latest,
               cc: "cl",
               cxx: "cl",
               build_type: "Release",
-              generators: "Visual Studio 17 2022"
-            }
-          - {
-              name: "Windows Clang Debug",
-              os: windows-latest,
-              cc: "clang",
-              cxx: "clang++",
-              build_type: "Debug",
-              generators: "Visual Studio 17 2022"
-            }
-          - {
-              name: "Windows Clang Release",
-              os: windows-latest,
-              cc: "clang",
-              cxx: "clang++",
-              build_type: "Release",
-              generators: "Visual Studio 17 2022"
+              generators: "Visual Studio 17 2022",
+              enable_module: "ON"
             }
           
           # Linux builds
@@ -55,7 +41,8 @@ jobs:
               cc: "gcc",
               cxx: "g++",
               build_type: "Debug",
-              generators: "Ninja"
+              generators: "Unix Makefiles",
+              enable_module: "OFF"
             }
           - {
               name: "Ubuntu GCC Release",
@@ -63,7 +50,8 @@ jobs:
               cc: "gcc",
               cxx: "g++",
               build_type: "Release",
-              generators: "Ninja"
+              generators: "Unix Makefiles",
+              enable_module: "OFF"
             }
           - {
               name: "Ubuntu Clang Debug",
@@ -71,7 +59,8 @@ jobs:
               cc: "clang",
               cxx: "clang++",
               build_type: "Debug",
-              generators: "Ninja"
+              generators: "Unix Makefiles",
+              enable_module: "OFF"
             }
           - {
               name: "Ubuntu Clang Release",
@@ -79,7 +68,26 @@ jobs:
               cc: "clang",
               cxx: "clang++",
               build_type: "Release",
-              generators: "Ninja"
+              generators: "Unix Makefiles",
+              enable_module: "OFF"
+            }
+          - {
+              name: "Ubuntu Clang-18 Module Debug",
+              os: ubuntu-latest,
+              cc: "clang-18",
+              cxx: "clang++-18",
+              build_type: "Debug",
+              generators: "Ninja",
+              enable_module: "ON"
+            }
+          - {
+              name: "Ubuntu Clang-21 Module Release",
+              os: ubuntu-latest,
+              cc: "clang-21",
+              cxx: "clang++-21",
+              build_type: "Release",
+              generators: "Ninja",
+              enable_module: "ON"
             }
 
           # macOS builds
@@ -89,7 +97,8 @@ jobs:
               cc: "clang",
               cxx: "clang++",
               build_type: "Debug",
-              generators: "Ninja"
+              generators: "Unix Makefiles",
+              enable_module: "OFF"
             }
           - {
               name: "macOS Clang Release",
@@ -97,7 +106,8 @@ jobs:
               cc: "clang",
               cxx: "clang++",
               build_type: "Release",
-              generators: "Ninja"
+              generators: "Unix Makefiles",
+              enable_module: "OFF"
             }
           - {
               name: "macOS GCC Debug",
@@ -105,7 +115,8 @@ jobs:
               cc: "gcc",
               cxx: "g++",
               build_type: "Debug",
-              generators: "Ninja"
+              generators: "Unix Makefiles",
+              enable_module: "OFF"
             }
           - {
               name: "macOS GCC Release",
@@ -113,7 +124,8 @@ jobs:
               cc: "gcc",
               cxx: "g++",
               build_type: "Release",
-              generators: "Ninja"
+              generators: "Unix Makefiles",
+              enable_module: "OFF"
             }
 
 
@@ -138,6 +150,22 @@ jobs:
       if: startsWith(matrix.config.os, 'macos')
       run: |
         brew install ninja
+
+    - name: Install Clang 18 (Ubuntu)
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.cc == 'clang-18'
+      run: |
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main"
+        sudo apt-get update
+        sudo apt-get install -y clang-18 clang++-18
+
+    - name: Install Clang 21 (Ubuntu)
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.cc == 'clang-21'
+      run: |
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-21 main"
+        sudo apt-get update
+        sudo apt-get install -y clang-21 clang++-21
 
     - name: Check compiler versions (Unix)
       if: "!startsWith(matrix.config.os, 'windows')"
@@ -219,9 +247,10 @@ jobs:
         Write-Host "VCPKG_ROOT: $vcpkgRoot"
         Write-Host "CMAKE_TOOLCHAIN_FILE: $toolchainFile"
         Write-Host "CMAKE_PREFIX_PATH: $installedPath"
+        Write-Host "MODULE_SUPPORT: ${{ matrix.config.enable_module }}"
         
         cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -G "${{ matrix.config.generators }}" `
-          -DNEKO_FUNCTION_BUILD_TESTS=ON -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON -DNEKO_FUNCTION_ENABLE_MODULE=ON `
+          -DNEKO_FUNCTION_BUILD_TESTS=ON -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON -DNEKO_FUNCTION_ENABLE_MODULE=${{ matrix.config.enable_module }} `
           -DCMAKE_TOOLCHAIN_FILE="$toolchainFile" `
           -DVCPKG_TARGET_TRIPLET=x64-windows `
           -DCMAKE_PREFIX_PATH="$installedPath"
@@ -230,13 +259,19 @@ jobs:
     - name: Configure CMake (Ubuntu)
       if: "startsWith(matrix.config.os, 'ubuntu')"
       run: |
-        cmake -B build -DNEKO_FUNCTION_ENABLE_MODULE=ON -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_FUNCTION_BUILD_TESTS=ON -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_PREFIX_PATH=$VCPKG_ROOT/installed/x64-linux
+        echo "=== Configuring NekoFunction (Ubuntu) ==="
+        echo "Compiler: ${{ matrix.config.cxx }}"
+        echo "Module support: ${{ matrix.config.enable_module }}"
+        cmake -B build -DNEKO_FUNCTION_ENABLE_MODULE=${{ matrix.config.enable_module }} -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_FUNCTION_BUILD_TESTS=ON -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_PREFIX_PATH=$VCPKG_ROOT/installed/x64-linux
       shell: bash
 
     - name: Configure CMake (macOS)
       if: "startsWith(matrix.config.os, 'macos')"
       run: |
-        cmake -B build -DNEKO_FUNCTION_ENABLE_MODULE=ON -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_FUNCTION_BUILD_TESTS=ON -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_PREFIX_PATH=$VCPKG_ROOT/installed/x64-macos
+        echo "=== Configuring NekoFunction (macOS) ==="
+        echo "Compiler: ${{ matrix.config.cxx }}"
+        echo "Module support: ${{ matrix.config.enable_module }}"
+        cmake -B build -DNEKO_FUNCTION_ENABLE_MODULE=${{ matrix.config.enable_module }} -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -G "${{ matrix.config.generators }}" -DNEKO_FUNCTION_BUILD_TESTS=ON -DNEKO_FUNCTION_AUTO_FETCH_DEPS=ON -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake -DCMAKE_PREFIX_PATH=$VCPKG_ROOT/installed/x64-macos
       shell: bash
 
     - name: Verify Hash and Archive Support

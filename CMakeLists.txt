@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(NekoFunction VERSION 1.0.0 LANGUAGES CXX)
+project(NekoFunction VERSION 1.0.9 LANGUAGES CXX)
 
 # ================
 # === Config ====
@@ -211,7 +211,7 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
     
     target_sources(NekoFunction_module
         PUBLIC
-            FILE_SET CXX_MODULES FILES
+            FILE_SET CXX_MODULES FILES                
                 ${CMAKE_CURRENT_SOURCE_DIR}/include/neko/function/neko.function.cppm
                 ${CMAKE_CURRENT_SOURCE_DIR}/include/neko/function/neko.function.archive.cppm
     )
@@ -258,15 +258,6 @@ if(NEKO_FUNCTION_ENABLE_MODULE)
         target_link_libraries(NekoFunction_module PUBLIC MINIZIP::minizip-ng)
     endif(NEKO_FUNCTION_ENABLE_ARCHIVE)
     
-    # Compiler-specific module flags
-    if(MSVC)
-        target_compile_options(NekoFunction_module PUBLIC /experimental:module)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(NekoFunction_module PUBLIC -fmodules-ts)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(NekoFunction_module PUBLIC -fmodules)
-    endif()
-    
     # Module still needs access to the include directory for the headers
     target_include_directories(NekoFunction_module PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -312,15 +303,21 @@ if(NEKO_FUNCTION_BUILD_TESTS)
     include(GoogleTest)
     gtest_discover_tests(NekoFunction_test)
 
-    if (NEKO_FUNCTION_ENABLE_MODULE)
-        add_executable(NekoFunction_module_tests tests/function_module_test.cpp)
-        target_link_libraries(NekoFunction_module_tests PRIVATE Neko::Schema::Module Neko::Function::Module GTest::gtest GTest::gtest_main)
-        target_compile_features(NekoFunction_module_tests PRIVATE cxx_std_20)
-        if(WIN32 AND NEKO_FUNCTION_ENABLE_HASH)
-            target_link_libraries(NekoFunction_module_tests PRIVATE ws2_32 Crypt32 advapi32 user32 bcrypt)
+    # Module test (if modules are enabled)
+    if(NEKO_FUNCTION_ENABLE_MODULE)
+        if (MSVC)
+            message(STATUS "NekoFunction module tests enabled (MSVC only)")
+
+            add_executable(NekoFunction_module_tests tests/function_module_test.cpp)
+            target_link_libraries(NekoFunction_module_tests PRIVATE Neko::Schema::Module Neko::Function::Module GTest::gtest GTest::gtest_main)
+            target_compile_features(NekoFunction_module_tests PRIVATE cxx_std_20)
+            if(WIN32 AND NEKO_FUNCTION_ENABLE_HASH)
+                target_link_libraries(NekoFunction_module_tests PRIVATE ws2_32 Crypt32 advapi32 user32 bcrypt)
+            endif()
+            gtest_discover_tests(NekoFunction_module_tests)
+        else()
+            message(STATUS "Skipping NekoFunction module tests on non-MSVC toolchains")
         endif()
-        
-        gtest_discover_tests(NekoFunction_module_tests)
     endif(NEKO_FUNCTION_ENABLE_MODULE)
 
 else()

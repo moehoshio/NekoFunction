@@ -13,6 +13,7 @@
 #include <gtest/gtest.h>
 
 import neko.function;
+import neko.function.archive;
 
 // ============================================================================
 // String Utilities Tests (Module)
