@@ -7,17 +7,19 @@
 #include <neko/function/hash.hpp>
 #endif // NEKO_FUNCTION_ENABLE_HASH
 
+#include <neko/schema/exception.hpp>
+
 #include <algorithm>
 #include <array>
+#include <cstdint>
+#include <cstdio>
+#include <iomanip>
+#include <iostream>
+#include <mutex>
 #include <random>
 #include <sstream>
-#include <iomanip>
 #include <string>
-#include <cstdint>
 #include <thread>
-#include <mutex>
-#include <iostream>
-#include <cstdio>
 
 #endif // NEKO_FUNCTION_ENABLE_MODULE
 
@@ -53,7 +55,6 @@ namespace neko::util::uuid {
         return std::string(buf);
     }
 
-#if defined(NEKO_FUNCTION_ENABLE_HASH)
     /**
      * @brief Converts a UUID string to bytes.
      * @param uuid UUID string in standard format
@@ -99,8 +100,10 @@ namespace neko::util::uuid {
      * Example Namespace UUID: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
      *
      * @note This requires using hash values, so OpenSSL support is needed
+     * @throws neko::ex::NotImplemented if hash support is not enabled
      */
     inline std::string uuidV3(const std::string &name, const std::string &namespaceUUID = "6ba7b810-9dad-11d1-80b4-00c04fd430c8") {
+#if defined(NEKO_FUNCTION_ENABLE_HASH)
         auto ns_bytes = uuidStringToBytes(namespaceUUID);
 
         std::string to_hash(reinterpret_cast<const char *>(ns_bytes.data()), ns_bytes.size());
@@ -124,7 +127,10 @@ namespace neko::util::uuid {
                 oss << '-';
         }
         return oss.str();
-    }
+#else
+#pragma message("uuid.hpp: uuidV3 requires hash support. Please install OpenSSL and set NEKO_FUNCTION_ENABLE_HASH = ON in CMake.")
+        throw ex::NotImplemented("UUID v3 requires hash support. Please compile with NEKO_FUNCTION_ENABLE_HASH=ON and install OpenSSL.");
 #endif // NEKO_FUNCTION_ENABLE_HASH
+    }
 
 } // namespace neko::util::uuid

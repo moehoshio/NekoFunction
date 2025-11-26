@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(NekoFunction VERSION 1.0.10 LANGUAGES CXX)
+project(NekoFunction VERSION 1.0.11 LANGUAGES CXX)
 
 # ================
 # === Config ====
@@ -160,8 +160,8 @@ else()
 
     # Hash support
     if (NEKO_FUNCTION_ENABLE_HASH)
-        target_compile_definitions(NekoFunction PUBLIC NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
-        target_link_libraries(NekoFunction PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+        target_compile_definitions(NekoFunction INTERFACE NEKO_FUNCTION_ENABLE_HASH NEKO_IMPORT_OPENSSL)
+        target_link_libraries(NekoFunction INTERFACE OpenSSL::SSL OpenSSL::Crypto)
         
         if (WIN32)
             get_target_property(_openssl_type_module OpenSSL::Crypto TYPE)
@@ -177,7 +177,7 @@ else()
             
             if(_is_static_openssl_module OR NEKO_FUNCTION_STATIC_LINK)
                 message(STATUS "Linking Windows system libraries for static OpenSSL")
-                target_link_libraries(NekoFunction PUBLIC
+                target_link_libraries(NekoFunction INTERFACE
                     ws2_32
                     Crypt32
                     advapi32

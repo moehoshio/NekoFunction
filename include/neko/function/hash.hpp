@@ -126,8 +126,8 @@ namespace neko::util::hash {
         }
         return ssRes.str();
 #else
-        #warning "Hash functions are not supported. Please enable OpenSSL support."
-        throw ex::Runtime("Hash functions are not supported. Please enable OpenSSL support.");
+#pragma message("hash.hpp: hash support is not enabled. Please install OpenSSL and set NEKO_FUNCTION_ENABLE_HASH = ON in CMake.")
+        throw ex::NotImplemented("Hash functions are not supported. Please enable OpenSSL support.");
 #endif // NEKO_IMPORT_OPENSSL
     }
 
