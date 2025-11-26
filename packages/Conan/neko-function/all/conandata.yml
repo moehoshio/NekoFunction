@@ -14,3 +14,7 @@
   "1.0.10":
     url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.10.tar.gz"
     sha256: "0584f8c78084ad9a91e6b2ddafcc4c9b91a474b5bb9e69cc32dba8b9e1fdabb9"
+
+  "1.0.11":
+    url: "https://github.com/moehoshio/NekoFunction/archive/refs/tags/v1.0.11.tar.gz"
+    sha256: "4f80d5087bec4b2abd6233b55ca763dfb8e421402e08464b3d9a0cd928947c0d"
